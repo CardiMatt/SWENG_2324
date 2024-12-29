@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!--<script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
 </script>
@@ -81,5 +81,61 @@ nav a:first-of-type {
     padding: 1rem 0;
     margin-top: 1rem;
   }
+}
+</style>
+-->
+
+<!--
+<template>
+  <div id="app">
+    <HomePage />
+  </div>
+</template>
+
+<script>
+import HomePage from './views/HomePage.vue';
+
+export default {
+  name: 'App',
+  components: {
+    HomePage
+  },
+};
+</script>
+
+<style>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+</style>
+-->
+
+
+<template>
+  <div id="app">
+    <!-- Vue Router caricherà i componenti in base alla route attiva -->
+    <router-view />
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'App',
+};
+</script>
+
+<style>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
 }
 </style>
