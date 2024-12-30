@@ -1,20 +1,33 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+
+// Import per il componente SalutoComponent
+import { createApp } from 'vue';
+import SalutoComponent from './components/SalutoComponent.vue';
+
+// Funzione per montare i componenti Vue
+function mountVueComponents(className: string, vueComponent: any): void {
+  const containers = document.querySelectorAll(`.${className}:not(.processed)`);
+
+  containers.forEach((container) => {
+    if (!container.classList.contains('processed')) {
+      createApp(vueComponent).mount(container);
+      container.classList.add('processed');
+      console.log(`Componente Vue montato in ${container}`);
+    }
+  });
+}
+
+// Esporre la funzione e il componente Vue globalmente su window
+window.mountVueComponents = mountVueComponents;
+window.SalutoComponent = SalutoComponent;
 </script>
+
+
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
   </header>
 
   <RouterView />
@@ -83,3 +96,11 @@ nav a:first-of-type {
   }
 }
 </style>
+
+<!-- <RouterView />   vs <router-view /> 
+  Vue li riconosce entrambi.
+  <RouterView /> 
+    (PascalCase), spesso usato nel file .vue, consigliato
+  <router-view /> 
+    (kebab-case), più comune nei file HTML o nei vecchi progetti Vue
+  -->
