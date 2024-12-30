@@ -4,6 +4,7 @@ import { RouterLink, RouterView } from 'vue-router'
 // Import per il componente SalutoComponent
 import { createApp } from 'vue';
 import SalutoComponent from './components/SalutoComponent.vue';
+import LoginComponent from './components/LoginComponent.vue';
 
 // Funzione per montare i componenti Vue
 function mountVueComponents(className: string, vueComponent: any): void {
@@ -21,24 +22,39 @@ function mountVueComponents(className: string, vueComponent: any): void {
 // Esporre la funzione e il componente Vue globalmente su window
 window.mountVueComponents = mountVueComponents;
 window.SalutoComponent = SalutoComponent;
+window.LoginComponent = LoginComponent;
 </script>
 
 
 
 <template>
   <header>
-
+    <h1 class="site-title">Adventures Master</h1>
   </header>
 
   <RouterView />
 </template>
 
 <style scoped>
+/* Header */
 header {
-  line-height: 1.5;
-  max-height: 100vh;
+  width: 100%;
+  display: flex;               /* Imposta l'header come un contenitore flex */
+  justify-content: center;     /* Centra orizzontalmente */
+  align-items: center;         /* Centra verticalmente */
+  padding: 2px;
+  background-color: #333;      /* Colore di sfondo dell'header */
 }
 
+/* Titolo */
+.site-title {
+  margin: 0;
+  color: white;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/**Precedenti preimpostati (togliere?) */
 .logo {
   display: block;
   margin: 0 auto 2rem;
