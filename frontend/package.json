@@ -11,7 +11,11 @@
     "type-check": "vue-tsc --build"
   },
   "dependencies": {
-    "vue": "^3.5.13"
+    "@mdi/font": "^7.4.47",
+    "firebase": "^11.1.0",
+    "vue": "^3.5.13",
+    "vuefire": "^3.2.1",
+    "vuetify": "^3.7.6"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.0",
@@ -19,7 +23,10 @@
     "@vitejs/plugin-vue": "^5.2.1",
     "@vitejs/plugin-vue-jsx": "^4.1.1",
     "@vue/tsconfig": "^0.7.0",
+    "deepmerge": "^4.3.1",
     "npm-run-all2": "^7.0.2",
+    "sass": "^1.83.0",
+    "sass-loader": "^16.0.4",
     "typescript": "~5.6.3",
     "vite": "^6.0.5",
     "vite-plugin-vue-devtools": "^7.6.8",
