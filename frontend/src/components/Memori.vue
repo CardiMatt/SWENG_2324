@@ -31,14 +31,6 @@
     ></memori-client>
 </template>
 <style>
-    /* Memori component: adattamento alle dimensioni della pagina */
-    .memori-component {
-    width: 100%;
-    height: 80%;
-    max-width: 100vw; /* Evita che il componente esca dalla larghezza */
-    max-height: 100vh; /* Adatta la dimensione del componente alla larghezza e altezza della pagina */
-
-    }
     .memori--global-background {
     pointer-events: none; /* Disabilita l'interazione con il background */
     }
