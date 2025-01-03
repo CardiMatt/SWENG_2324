@@ -1,6 +1,7 @@
 import { createApp } from 'vue';
 import Login from './components/Login.vue';
 import Register from './components/Register.vue';
+import Logout from './components/Logout.vue';
 
 // Funzione per montare i componenti Vue
 function mountVueComponents(className, vueComponent) {
@@ -19,3 +20,4 @@ function mountVueComponents(className, vueComponent) {
 window.mountVueComponents = mountVueComponents;
 window.Login = Login;
 window.Register = Register;
+window.Logout = Logout;
