@@ -1,24 +1,15 @@
-import axios, { type AxiosInstance } from "axios";
+import memoriApiClient from '@memori.ai/memori-api-client';
 
 export class AisuruService {
-  private apiClient: AxiosInstance;
+  private client: ReturnType<typeof memoriApiClient>;
   private sessionID: string | null = null;
 
-  // Configurazione predefinita
-  private static readonly config = {
-    baseURL: import.meta.env.VITE_BASE_URL,
-    memoriID: import.meta.env.VITE_MEMORI_ID,
-    tag: import.meta.env.VITE_TAG,
-    pin: import.meta.env.VITE_PIN,
-  };
-
   constructor() {
-    this.apiClient = axios.create({
-      baseURL: AisuruService.config.baseURL,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    // Inizializza il client con i parametri predefiniti
+    this.client = memoriApiClient(
+      import.meta.env.VITE_BACKEND_URL || "https://backend.memori.ai", // URL backend
+      import.meta.env.VITE_ENGINE_URL || "https://engine.memori.ai"   // URL engine
+    );
   }
 
   /**
@@ -26,16 +17,14 @@ export class AisuruService {
    */
   private async openSession(): Promise<void> {
     try {
-      const { memoriID, tag, pin } = AisuruService.config;
-
-      const response = await this.apiClient.post("/memori/v2/Session", {
-        memoriID,
-        tag,
-        pin,
+      const response = await this.client.initSession({
+        memoriID: import.meta.env.VITE_MEMORI_ID,
+        tag: import.meta.env.VITE_TAG,
+        pin: import.meta.env.VITE_PIN,
       });
 
-      if (response.data?.sessionID) {
-        this.sessionID = response.data.sessionID;
+      if (response.sessionID) {
+        this.sessionID = response.sessionID;
         console.log("Sessione aperta con successo:", this.sessionID);
       } else {
         throw new Error("Impossibile ottenere il sessionID.");
@@ -56,7 +45,7 @@ export class AisuruService {
     }
 
     try {
-      await this.apiClient.delete(`/memori/v2/Session/${this.sessionID}`);
+      await this.client.deleteSession(this.sessionID);
       console.log("Sessione chiusa con successo.");
       this.sessionID = null;
     } catch (error) {
@@ -74,10 +63,15 @@ export class AisuruService {
       await this.openSession();
     }
 
+    // Assicura che sessionID non sia null dopo openSession
+    if (!this.sessionID) {
+      throw new Error("Impossibile ottenere un sessionID valido.");
+    }
+
     try {
-      const response = await this.apiClient.get(`/memori/v2/Session/${this.sessionID}`);
-      console.log("Dettagli della sessione ricevuti:", response.data);
-      return response.data;
+      const sessionDetails = await this.client.getSession(this.sessionID);
+      console.log("Dettagli della sessione ricevuti:", sessionDetails);
+      return sessionDetails;
     } catch (error) {
       console.error("Errore durante il recupero dei dettagli della sessione:", error);
       throw error;
