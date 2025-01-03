@@ -3,11 +3,18 @@ import './assets/main.css';
 import { createApp } from 'vue';
 import App from './App.vue';
 
+// Script per l'inserimento dei componenti
+import './exposeVueComponents';
+
 // Importa VueFire e il modulo di autenticazione
 import { VueFire, VueFireAuth, VueFireFirestoreOptionsAPI } from 'vuefire';
 
 // Importa la configurazione di Firebase
 import { firebaseApp } from './firebase';
+
+// Bootstrap
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap";
 
 // Vuetify
 import "vuetify/styles";
