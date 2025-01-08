@@ -44,3 +44,35 @@
 
 <script setup lang="ts">
 </script>
+
+<!-- 
+/**
+ * Dispatches a MemoriTextEntered event to simulate a user typing a message
+ * @param message The text message to send
+ * @param waitForPrevious Whether to wait for previous message to finish before sending (default true)
+ * @param hidden Whether to hide the message from chat history (default false)
+ * @param typingText Optional custom typing indicator text
+ * @param useLoaderTextAsMsg Whether to use the loader text as the message (default false)
+ * @param hasBatchQueued Whether there are more messages queued to be sent (default false)
+ */
+const typeMessage = (
+  message: string,
+  waitForPrevious = true,
+  hidden = false,
+  typingText?: string,
+  useLoaderTextAsMsg = false,
+  hasBatchQueued = false
+) => {
+
+---
+
+const typeBatchMessages = (
+  messages: {
+    message: string;
+    waitForPrevious?: boolean;
+    hidden?: boolean;
+    typingText?: string;
+    useLoaderTextAsMsg?: boolean;
+  }[]
+) 
+-->

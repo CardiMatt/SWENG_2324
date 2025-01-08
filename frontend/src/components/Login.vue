@@ -58,7 +58,8 @@ export default defineComponent({
           action: "User logged in",
         });
 
-        alert("Accesso avvenuto con successo!");
+        window.typeMessage("Contenuto di Attivazione", true, true);
+
       } catch (err: any) {
         error.value = `Errore: ${err.message}`;
       }

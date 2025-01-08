@@ -44,3 +44,25 @@ app.use(vuetify);
 
 // Monta l'app
 app.mount('#app');
+
+declare global {
+  interface Window {
+    /**
+     * Dispatches a MemoriTextEntered event to simulate a user typing a message
+     * @param message The text message to send
+     * @param waitForPrevious Whether to wait for the previous message to finish before sending (default true)
+     * @param hidden Whether to hide the message from chat history (default false)
+     * @param typingText Optional custom typing indicator text
+     * @param useLoaderTextAsMsg Whether to use the loader text as the message (default false)
+     * @param hasBatchQueued Whether there are more messages queued to be sent (default false)
+     */
+    typeMessage: (
+      message: string,
+      waitForPrevious?: boolean,
+      hidden?: boolean,
+      typingText?: string,
+      useLoaderTextAsMsg?: boolean,
+      hasBatchQueued?: boolean
+    ) => void;
+  }
+}  
