@@ -58,7 +58,8 @@ export default defineComponent({
           action: "User logged in",
         });
 
-        window.typeMessage("Contenuto di Attivazione", true, true);
+        //window.typeMessage("Contenuto di Attivazione", true, true);
+        window.typeMessage("Catalog", true, true);
 
       } catch (err: any) {
         error.value = `Errore: ${err.message}`;

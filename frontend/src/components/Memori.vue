@@ -35,11 +35,12 @@
     pointer-events: none; /* Disabilita l'interazione con il background */
     }
 
-    #chat-fieldset {
-    display: none; /* Nasconde completamente l'elemento */
-    pointer-events: none; /* Disabilita l'interazione con il puntatore */
-    user-select: none; /* Impedisce la selezione del contenuto */
-    }
+    
+    /*#chat-fieldset {*/
+    /*display: none;  Nasconde completamente l'elemento */
+    /*pointer-events: none;  Disabilita l'interazione con il puntatore */
+    /* user-select: none; Impedisce la selezione del contenuto */
+    /*}*/
 </style>
 
 <script setup lang="ts">
