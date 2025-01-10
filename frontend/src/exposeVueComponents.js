@@ -3,6 +3,7 @@ import Login from './components/Login.vue';
 import Register from './components/Register.vue';
 import Logout from './components/Logout.vue';
 import Catalog from './components/Catalog.vue';
+import SaveGame from './components/SaveGame.vue';
 
 // Funzione per montare i componenti Vue
 function mountVueComponentsInChat(className, vueComponent) {
@@ -68,3 +69,4 @@ window.Login = Login;
 window.Register = Register;
 window.Logout = Logout;
 window.Catalog = Catalog;
+window.SaveGame = SaveGame;
