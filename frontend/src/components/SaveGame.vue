@@ -1,14 +1,13 @@
 <template>
-    <div class="save-game">
-      <h2>Salva Partita</h2>
-      <button @click="saveProgress" :disabled="isSaving">
-        {{ isSaving ? 'Salvataggio...' : 'Salva' }}
-      </button>
-      <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
-    </div>
-  </template>
+  <div class="save-game">
+    <button class="btn btn-success" @click="saveProgress" :disabled="isSaving">
+      {{ isSaving ? 'Salvataggio...' : 'Salva' }}
+    </button>
+    <p v-if="errorMessage" class="text-danger mt-2">{{ errorMessage }}</p>
+  </div>
+</template>
   
-  <script lang="ts">
+<script lang="ts">
   import { defineComponent, ref } from 'vue';
   import { GameSaveRepository } from '@/repositories/GameSaveRepository';
   import type { GameSave } from '@/models/GameSave';
@@ -40,85 +39,57 @@
       },
     },
     setup(props) {
-    const isSaving = ref(false);
-    const errorMessage = ref('');
+      const isSaving = ref(false);
+      const errorMessage = ref('');
 
-    const saveProgress = async () => {
-      isSaving.value = true;
-      errorMessage.value = '';
+      const saveProgress = async () => {
+        isSaving.value = true;
+        errorMessage.value = '';
 
-      // const gameSave: GameSave = {
-      //   id: uuidv4(),
-      //   userId: props.userId,
-      //   storyId: props.storyId,
-      //   progress: props.progress,
-      //   saveDate: new Date(),
-      //   state: props.state,
-      //   inventory: props.inventory,
-      // };
+        // const gameSave: GameSave = {
+        //   id: uuidv4(),
+        //   userId: props.userId,
+        //   storyId: props.storyId,
+        //   progress: props.progress,
+        //   saveDate: new Date(),
+        //   state: props.state,
+        //   inventory: props.inventory,
+        // };
 
-      
-      const gameSave: GameSave = {
-        id: uuidv4(),
-        userId: 'user1',
-        storyId: 'story1',
-        progress: 'new',
-        saveDate: new Date(),
-        state: 'new',
-        inventory: 'empty',
+        
+        const gameSave: GameSave = {
+          id: uuidv4(),
+          userId: 'user1',
+          storyId: 'story1',
+          progress: 'new',
+          saveDate: new Date(),
+          state: 'new',
+          inventory: 'empty',
+        };
+
+        try {
+          await GameSaveRepository.saveGameSave(gameSave);
+          alert('Salvataggio completato!');
+        } catch (error) {
+          console.error('Errore nel salvataggio:', error);
+          errorMessage.value = 'Errore durante il salvataggio. Riprova.';
+        } finally {
+          isSaving.value = false;
+        }
       };
 
-      try {
-        await GameSaveRepository.saveGameSave(gameSave);
-        alert('Salvataggio completato!');
-      } catch (error) {
-        console.error('Errore nel salvataggio:', error);
-        errorMessage.value = 'Errore durante il salvataggio. Riprova.';
-      } finally {
-        isSaving.value = false;
-      }
-    };
-
-    return {
-      saveProgress,
-      isSaving,
-      errorMessage,
-    };
-  },
-});
-
-  /*
-      async saveProgress() {
-        const gameSave: GameSave = {
-            id: uuidv4(),
-            userId: this.userId,
-            storyId: this.storyId,
-            progress: this.progress,
-            saveDate: new Date(),
-            state: this.state,
-            inventory: this.inventory
-        };
-  
-        await GameSaveRepository.saveGameSave(gameSave);
-        alert('Salvataggio completato!');
-      },
+      return {
+        saveProgress,
+        isSaving,
+        errorMessage,
+      };
     },
-  });*/
-  </script>
+  });
+</script>
   
-  <style scoped>
+<style scoped>
   .save-game {
     margin: 20px;
   }
-  button {
-    background-color: #2ecc71;
-    color: white;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-  }
-  button:hover {
-    background-color: #27ae60;
-  }
-  </style>
+</style>
   
