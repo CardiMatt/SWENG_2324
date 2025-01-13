@@ -50,7 +50,7 @@ describe('GameSaveRepository', () => {
     setDocMock = vi.mocked(setDoc);
     getFirestoreMock = vi.mocked(getFirestore);
 
-    // Importare il mock di 'db' dopo aver impostato i mock di Firestore
+    // Importo il mock di 'db' dopo aver impostato i mock di Firestore
     const firebase = await import('../firebase');
     mockedDb = firebase.db;
     getFirestoreMock.mockReturnValue(mockedDb);
