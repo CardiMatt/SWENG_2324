@@ -59,7 +59,8 @@ export default defineComponent({
         });
 
         //window.typeMessage("Contenuto di Attivazione", true, true);
-        window.typeMessage("Catalog", true, true);
+        window.typeMessage("CA001Auth", true, true);
+        window.typeMessage("Menu", true, true);
 
       } catch (err: any) {
         error.value = `Errore: ${err.message}`;

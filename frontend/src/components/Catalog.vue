@@ -1,139 +1,220 @@
 <template>
-    <div class="browsing-stories">
-      <div v-for="story in stories" :key="story.id" class="story-card">
-        <div class="card-background" :style="{ backgroundImage: `url(${story.image})`, opacity: '0.8' }">
-          <h2 class="story-title">{{ story.title }}</h2>
-          <p class="story-description">
-            {{ story.description.slice(0, 100) }}...
-            <span class="read-more" @click="openPopup(story)">Vedi di più</span>
-          </p>
-          <p class="story-meta">Di {{ story.author }} | Genere: {{ story.genre }}</p>
-          <button class="play-story" @click="playStory(story.id)">Gioca Storia</button>
+  <div class="main-container">
+    <div class="filters-container mb-4">
+      <div class="filters-row">
+        <div class="filter-item">
+          <label for="filter-author" class="form-label">Autore</label>
+          <input v-model="filters.author" type="text" id="filter-author" class="form-control" placeholder="Inserisci autore">
         </div>
-      </div>
-  
-      <div v-if="selectedStory" class="story-popup" @click="closePopup">
-        <div class="popup-content" @click.stop>
-          <h2>{{ selectedStory.title }}</h2>
-          <p>{{ selectedStory.description }}</p>
-          <button @click="closePopup">Chiudi</button>
+        <div class="filter-item">
+          <label for="filter-genre" class="form-label">Genere</label>
+          <select v-model="filters.genre" id="filter-genre" class="form-select">
+            <option value="">Tutti</option>
+            <option v-for="genre in uniqueGenres" :key="genre" :value="genre">{{ genre }}</option>
+          </select>
+        </div>
+        <div class="filter-item">
+          <label for="filter-title" class="form-label">Titolo</label>
+          <input v-model="filters.title" type="text" id="filter-title" class="form-control" placeholder="Inserisci titolo">
         </div>
       </div>
     </div>
-  </template>
-  
-  <script lang="ts">
-  import { defineComponent, ref } from 'vue';
-  import { fetchStories } from '@/services/storyService';
-  import { type Story } from '@/models/Story';
-  
-  export default defineComponent({
-    name: 'Catalog',
-    setup() {
-      const stories  =ref<Story[]>(fetchStories());
-      const selectedStory = ref<Story | null>(null); //permetto che sia null inizialmente, all'inizio non è selezionata nessuna storia
-  
-      const openPopup = (story: any) => {
-        selectedStory.value = story;
-      };
-  
-      const closePopup = () => {
-        selectedStory.value = null;
-      };
-  
-      const playStory = (storyId: number) => {
-        console.log(`Playing story with ID: ${storyId}`);
-      };
-  
-      return {
-        stories,
-        selectedStory,
-        openPopup,
-        closePopup,
-        playStory,
-      };
-    },
-  });
-  </script>
-  
-  <style scoped>
-  .browsing-stories {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-  
-  .story-card {
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    width: 300px;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .card-background {
-    background-size: cover;
-    background-position: center;
-    padding: 16px;
-    color: white;
-    position: relative;
-  }
-  
-  .story-title {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-  
-  .story-description {
-    margin: 12px 0;
-    font-size: 0.9rem;
-  }
-  
-  .read-more {
-    color: #3498db;
-    cursor: pointer;
-    text-decoration: underline;
-  }
-  
-  .story-meta {
-    font-size: 0.8rem;
-    color: #dddddd;
-  }
-  
-  .play-story {
-    background: #2ecc70;
-    color: white;
-    border: none;
-    padding: 8px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 1rem;
-    width: 100%;
-  }
-  
-  .story-popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    z-index: 1000;
-    cursor: pointer; /* cliccabile */
-  }
-  
-  .popup-content {
-    background: #333;
-    padding: 20px;
-    border-radius: 8px;
-    text-align: center;
-    cursor: default;
-  }
-  </style>
+
+    <div class="catalog-container">
+      <div class="catalog-grid">
+        <CatalogCard 
+          v-for="story in filteredStories" 
+          :key="story.id" 
+          :story="story" 
+          @open-popup="openPopup"
+        />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import { defineComponent, ref, computed } from 'vue';
+import CatalogCard from './CatalogCard.vue';
+import { StoryRepository } from '../repositories/StoryRepository';
+
+export default defineComponent({
+  name: 'Catalog',
+  components: {
+    CatalogCard,
+  },
+  setup() {
+    const stories = ref([]);
+    const selectedStory = ref(null);
+    const filters = ref({
+      author: '',
+      genre: '',
+      title: '',
+    });
+
+    // Fetch stories from repository
+    StoryRepository.getSampleStories().then((data) => {
+      stories.value = data;
+    });
+
+    const uniqueGenres = computed(() => {
+      const genres = stories.value.map((story) => story.genre);
+      return [...new Set(genres)];
+    });
+
+    const filteredStories = computed(() => {
+      return stories.value.filter((story) => {
+        const matchesAuthor = !filters.value.author || story.author.toLowerCase().includes(filters.value.author.toLowerCase());
+        const matchesGenre = !filters.value.genre || story.genre === filters.value.genre;
+        const matchesTitle = !filters.value.title || story.title.toLowerCase().includes(filters.value.title.toLowerCase());
+        return matchesAuthor && matchesGenre && matchesTitle;
+      });
+    });
+
+    return {
+      stories,
+      selectedStory,
+      filters,
+      filteredStories,
+      uniqueGenres,
+    };
+  },
+});
+</script>
+
+<style>
+.main-container {
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.filters-container {
+  background-color: #e9ecef;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.catalog-container {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.popup-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1050;
+  background-color: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Contenitore principale */
+.main-container {
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+/* Contenitore filtri */
+.filters-container {
+  background-color: #e9ecef;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.filters-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.filter-item {
+  flex: 1 1 30%; /* Ogni filtro prende il 30% dello spazio disponibile */
+  min-width: 200px; /* Larghezza minima */
+}
+
+/* Contenitore catalogo */
+.catalog-container {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Griglia flessibile */
+  gap: 15px; /* Spaziatura tra le card */
+}
+
+/* Popup */
+.popup-container {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1050;
+  background-color: rgba(0, 0, 0, 0.5);
+  width: 90%;
+  max-width: 600px;
+  height: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.popup-container .popup-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Card */
+.catalog-container .card {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.catalog-container .card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.catalog-container .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+</style>
