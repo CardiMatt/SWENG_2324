@@ -12,7 +12,7 @@
           </v-col>
 
           <!-- Colonna destra -->
-          <v-col cols="12" md="6" class="memori-container">
+          <v-col cols="12" md="12" class="memori-container">
             <Memori />
           </v-col>
 
