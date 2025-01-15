@@ -79,10 +79,18 @@ function mountVueComponents(className, vueComponent){
 
 }
 
+function unmountVueComponentsInExtention(vueComponent){
+  const extension = document.getElementById("extension");
+  extension.innerHTML = "";
+  extension.style.zIndex = "-200";
+}
+
 // Esportare la funzione e i componenti
 window.mountVueComponents = mountVueComponents;
 window.mountVueComponentsInChat = mountVueComponentsInChat;
 window.mountVueComponentsInExtention = mountVueComponentsInExtention;
+window.unmountVueComponentsInChat = unmountVueComponentsInChat;
+window.unmountVueComponentsInExtention = unmountVueComponentsInExtention;
 window.Login = Login;
 window.Register = Register;
 window.Logout = Logout;

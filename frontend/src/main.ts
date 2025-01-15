@@ -64,5 +64,15 @@ declare global {
       useLoaderTextAsMsg?: boolean,
       hasBatchQueued?: boolean
     ) => void;
+
+    typeBatchMessages: (
+      messages: {
+        message: string;
+        waitForPrevious?: boolean;
+        hidden?: boolean;
+        typingText?: string;
+        useLoaderTextAsMsg?: boolean;
+      }[]
+    ) => void;
   }
 }  

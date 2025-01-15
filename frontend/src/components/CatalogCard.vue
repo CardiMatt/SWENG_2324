@@ -26,6 +26,7 @@
         playStory() {
             if (typeof window.typeMessage === 'function') {
             window.typeMessage(this.story.id, true, true);
+            window.unmountVueComponentsInExtention("Catalog");
             } else {
             console.error('window.typeMessage non è definita');
             }
