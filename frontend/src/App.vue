@@ -9,16 +9,10 @@
 
           <!-- Colonna sinistra -->
           <v-col cols="12" md="6" class="left-column">
-            <v-card>
-              <v-card-text>
-                <!-- Spazio vuoto per contenuti dinamici -->
-                <div class="dynamic-content"></div>
-              </v-card-text>
-            </v-card>
           </v-col>
 
           <!-- Colonna destra -->
-          <v-col cols="12" md="6" class="memori-container">
+          <v-col cols="12" md="12" class="memori-container">
             <Memori />
           </v-col>
 

@@ -58,7 +58,12 @@ export default defineComponent({
           action: "User logged in",
         });
 
-        window.typeMessage("Contenuto di Attivazione", true, true);
+        //window.typeMessage("Contenuto di Attivazione", true, true);
+        window.typeBatchMessages([
+            { message: "CA001Auth",  hidden: true, waitForPrevious: true },
+            { message: 'Menu', hidden: true, waitForPrevious: true},
+          ]);
+        
 
       } catch (err: any) {
         error.value = `Errore: ${err.message}`;
