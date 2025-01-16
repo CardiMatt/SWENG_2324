@@ -4,6 +4,7 @@ import Register from './components/Register.vue';
 import Logout from './components/Logout.vue';
 import Catalog from './components/Catalog.vue';
 import CatalogCard from './components/CatalogCard.vue';
+import SaveGame from './components/SaveGame.vue';
 
 // Funzione per montare i componenti Vue
 function mountVueComponentsInChat(className, vueComponent) {
@@ -96,3 +97,4 @@ window.Register = Register;
 window.Logout = Logout;
 window.Catalog = Catalog;
 window.CatalogCard = CatalogCard;
+window.SaveGame = SaveGame;
