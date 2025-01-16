@@ -5,30 +5,18 @@ import type { GameSave } from '../models/GameSave';
 
 /*interfaccia per comunicare con il database Firebase*/
 
-//const gameSaveCollection = collection(db, 'gameSaves');
 
 export class GameSaveRepository {
+
   // Salva un nuovo salvataggio
-  // static async saveGameSave(gameSave: GameSave): Promise<void> {
-  //   try{
-  //     const gameSaveRef = doc(gameSaveCollection, gameSave.id);
-  //   await setDoc(gameSaveRef, { ...gameSave, saveDate: gameSave.saveDate.toISOString() });
-  //   } catch(error) {
-  //     console.error('Errore durante il salvataggio della partita:', error);
-  //     throw new Error('Non è stato possibile salvare la partita.');
-  //   }
-  static async saveGameSave(gameSave: any) {
+  static async saveGameSave(gameSave: GameSave) {
     try {
-      //const db = getFirestore();
       const gameSaveRef = doc(collection(db, 'gameSaves'), gameSave.id);
      await setDoc(gameSaveRef, gameSave);
-    // await setDoc(gameSaveRef, { ...gameSave, saveDate: gameSave.saveDate.toISOString() });
-   
     } catch (error) {
       console.error('Errore durante il salvataggio della partita:', error);
-      throw error;
+      throw new Error('Non è stato possibile salvare la partita.');
     }
-  
   }
 
   // Ottiene un salvataggio per ID
