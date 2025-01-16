@@ -26,6 +26,7 @@
         useMathFormatting="false"
         showUpload="false"
         enableAudio="true"
+        context="AUTH:NON_AUTENTICATO,STORIA:NULL"
         integrationID="5f2ab2ab-5574-4ec6-9034-fd5fb948a449"
         initialQuestion="Benvenuto"
     ></memori-client>
