@@ -1,93 +1,71 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { deleteDoc, doc } from 'firebase/firestore';
 import { GameSaveRepository } from '../repositories/GameSaveRepository';
-import { collection, doc, setDoc, getFirestore } from 'firebase/firestore';
+import { db } from '../firebase';
 import type { GameSave } from '../models/GameSave';
 
-// Mock delle funzioni di Firestore
-vi.mock('firebase/firestore', () => {
-  const collectionMock = vi.fn();
-  const docMock = vi.fn();
-  const setDocMock = vi.fn();
-  const getFirestoreMock = vi.fn();
-
-  return {
-    collection: collectionMock,
-    doc: docMock,
-    setDoc: setDocMock,
-    getFirestore: getFirestoreMock,
-  };
-});
-
-// Mock del modulo 'firebase' che contiene 'db'
-vi.mock('../firebase', () => {
-  const mockedDb = {} as ReturnType<typeof getFirestore>;
-  return {
-    db: mockedDb,
-  };
-});
-
-describe('GameSaveRepository', () => {
-  const mockGameSave: GameSave = {
-    id: 'testId',
-    userId: 'user123',
-    storyId: 'story456',
-    state: 'inProgress',
-    progress: 'scene1',
-    inventory: 'empty',
+describe('GameSaveRepository Tests', () => {
+  // Salvataggio di test (senza id, perché Firestore lo genera automaticamente)
+  let testSaveId = '';
+  const testGameSave = {
+    userId: 'testUser',
+    storyId: 'storyTest',
+    state: 'ACTIVE',
+    progress: '42',
+    inventory: 'sword',
     saveDate: new Date(),
-  };
+  } satisfies Omit<GameSave, 'id'>;
 
-  let collectionMock: ReturnType<typeof vi.fn>;
-  let docMock: ReturnType<typeof vi.fn>;
-  let setDocMock: ReturnType<typeof vi.fn>;
-  let getFirestoreMock: ReturnType<typeof vi.fn>;
-  let mockedDb: ReturnType<typeof getFirestore>;
-
-  beforeEach(async () => {
-    vi.clearAllMocks();
-    collectionMock = vi.mocked(collection);
-    docMock = vi.mocked(doc);
-    setDocMock = vi.mocked(setDoc);
-    getFirestoreMock = vi.mocked(getFirestore);
-
-    // Importo il mock di 'db' dopo aver impostato i mock di Firestore
-    const firebase = await import('../firebase');
-    mockedDb = firebase.db;
-    getFirestoreMock.mockReturnValue(mockedDb);
-    collectionMock.mockReturnValue({} as any);
+  /**
+   * 1. Creazione di un nuovo salvataggio
+   */
+  it('saveGameSave dovrebbe creare un nuovo salvataggio e ritornarne l\'ID', async () => {
+    testSaveId = await GameSaveRepository.saveGameSave(testGameSave);
+    expect(testSaveId).toBeDefined();
+    expect(typeof testSaveId).toBe('string');
   });
 
-  it('should save a game save successfully', async () => {
-    const mockDocRef = {};
-    docMock.mockReturnValue(mockDocRef);
-    setDocMock.mockResolvedValue(undefined);
+  /**
+   * 2. Recupero del salvataggio tramite ID
+   */
+  it('getGameSaveById dovrebbe restituire i dati corretti del salvataggio', async () => {
+    const retrievedSave = await GameSaveRepository.getGameSaveById(testSaveId);
 
-    await GameSaveRepository.saveGameSave(mockGameSave);
-
-    console.log('mockedDb:', mockedDb);
-    console.log('mockDocRef:', mockDocRef);
-    console.log('mockGameSave:', mockGameSave);
-
-    expect(collectionMock).toHaveBeenCalledWith(mockedDb, 'gameSaves');
-    expect(docMock).toHaveBeenCalledWith({}, mockGameSave.id);
-    expect(setDocMock).toHaveBeenCalledWith(mockDocRef, {
-      id: 'testId',
-      userId: 'user123',
-      storyId: 'story456',
-      state: 'inProgress',
-      progress: 'scene1',
-      inventory: 'empty',
-      saveDate: mockGameSave.saveDate,
-    });
-    console.log('Game save successful!');
+    // Ci aspettiamo che esista
+    expect(retrievedSave).not.toBeNull();
+    // E che contenga i dati che abbiamo salvato
+    expect(retrievedSave?.id).toBe(testSaveId);
+    expect(retrievedSave?.userId).toBe(testGameSave.userId);
+    expect(retrievedSave?.storyId).toBe(testGameSave.storyId);
+    expect(retrievedSave?.state).toBe(testGameSave.state);
+    expect(retrievedSave?.progress).toBe(testGameSave.progress);
+    expect(retrievedSave?.inventory).toEqual(testGameSave.inventory);
+    expect(retrievedSave?.saveDate).toBeInstanceOf(Date);
   });
 
-  it('should throw an error if saving fails', async () => {
-    setDocMock.mockRejectedValue(new Error('Firebase error'));
+  /**
+   * 3. Recupero di tutti i salvataggi per un userId
+   */
+  it('getGameSavesByUserId dovrebbe restituire un array di salvataggi per lo userId specificato', async () => {
+    // Recuperiamo i salvataggi creati dall’utente 'testUser'
+    const userSaves = await GameSaveRepository.getGameSavesByUserId('testUser');
 
-    await expect(GameSaveRepository.saveGameSave(mockGameSave)).rejects.toThrow(
-      'Non è stato possibile salvare la partita.'
-    );
-    console.log('Error during game save as expected.');
+    // Controlliamo che l’array non sia vuoto
+    expect(userSaves.length).toBeGreaterThan(0);
+
+    // Verifichiamo che all’interno ci sia quello che abbiamo appena creato
+    const foundSave = userSaves.find(save => save.id === testSaveId);
+    expect(foundSave).toBeDefined();
+    expect(foundSave?.userId).toBe(testGameSave.userId);
+  });
+
+  /**
+   * 4. Pulizia finale: cancella il documento che abbiamo creato
+   *    per evitare di lasciare dati sporchi nel DB.
+   */
+  afterAll(async () => {
+    if (testSaveId) {
+      await deleteDoc(doc(db, 'gameSaves', testSaveId));
+    }
   });
 });
