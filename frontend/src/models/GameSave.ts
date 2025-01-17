@@ -1,10 +1,18 @@
-// src/models/GameSave.ts
+// models/GameSave.ts
+
+export interface MemoriConfig {
+  context: string;
+  initialQuestion: string;
+}
+
 export interface GameSave {
-    id: string; // ID unico per il salvataggio
-    userId: string; // ID dell'utente che ha fatto il salvataggio
-    storyId: string; // ID della storia salvata
-    state: string; //TODO enum (new, inProgress, Terminated)
-    progress: string; // Stato di avanzamento/scenario corrente 
-    inventory: string; //TODO crea tipo inventory
-    saveDate: Date; // Data del salvataggio
-  }
+  id: string;
+  userId: string;
+  storyId: string;
+  state: string;
+  progress: string;
+  inventory: string;
+  saveDate: Date;
+
+  memoriConfig: MemoriConfig;
+}

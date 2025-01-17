@@ -1,8 +1,8 @@
 <template>
   <div class="save-game">
-    <button class="btn btn-success" @click="saveProgress" :disabled="isSaving">
+   <!-- <button class="btn btn-success" @click="saveProgress" :disabled="isSaving">
       {{ isSaving ? 'Salvataggio...' : 'Salva' }}
-    </button>
+    </button>  -->
     <p v-if="errorMessage" class="text-danger mt-2">{{ errorMessage }}</p>
   </div>
 </template>
@@ -10,7 +10,8 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import { GameSaveRepository } from '@/repositories/GameSaveRepository';
-// import type { GameSave } from '@/models/GameSave';
+import type { GameSave } from '@/models/GameSave';
+import type { MemoriConfig } from '@/models/GameSave';
 
 export default defineComponent({
   name: 'SaveGame',
@@ -39,10 +40,15 @@ export default defineComponent({
   setup(props) {
     const isSaving = ref(false);
     const errorMessage = ref('');
+    /*
 
     const saveProgress = async () => {
       isSaving.value = true;
       errorMessage.value = '';
+      window.getMemoriState();
+      // storyId --> contesto storia
+      // scenario --> contesto scenario
+      // initialMessage (ultimo messaggio inviato dall'utente)
 
       try {
         // Otteniamo l'ID generato
@@ -53,6 +59,7 @@ export default defineComponent({
         state: props.state,
         inventory: props.inventory,
         saveDate: new Date(),
+        memoriConfig: 
       });
         alert(`Salvataggio completato! ID generato: ${docId}`);
       } catch (err) {
@@ -62,9 +69,10 @@ export default defineComponent({
         isSaving.value = false;
       }
     };
+    */
 
     return {
-      saveProgress,
+    //  saveProgress,
       isSaving,
       errorMessage,
     };
