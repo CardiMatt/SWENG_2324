@@ -37,8 +37,8 @@ export default defineComponent({
   setup() {
     // Esempio di MemoriConfig
     const someMemoriConfig = ref<MemoriConfig>({
-      context: "AUTH:AUTENTICATO,STORIA: CUOREDILUCE",
-      initialQuestion: "00001"
+      context: "AUTH:NON_AUTENTICATO,STORIA: NULL",
+      initialQuestion: "Benvenuto"
     });
 
     return {
