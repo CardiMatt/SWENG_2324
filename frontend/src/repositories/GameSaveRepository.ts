@@ -16,6 +16,7 @@ const gameSaveCollection = collection(db, 'gameSaves');
 export class GameSaveRepository {
   static async saveGameSave(gameSave: Omit<GameSave, 'id'>): Promise<string> {
     try {
+      console.log(gameSave);
       const docRef = await addDoc(gameSaveCollection, gameSave);
       return docRef.id;
     } catch (error) {
@@ -40,7 +41,6 @@ export class GameSaveRepository {
         id: saveId,
         userId: data.userId,
         storyId: data.storyId,
-        state: data.state,
         progress: data.progress,
         inventory: data.inventory,
         saveDate: new Date(data.saveDate),
@@ -64,7 +64,6 @@ export class GameSaveRepository {
           id: docSnapshot.id,
           userId: data.userId,
           storyId: data.storyId,
-          state: data.state,
           progress: data.progress,
           inventory: data.inventory,
           saveDate: new Date(data.saveDate),
@@ -84,7 +83,6 @@ export class GameSaveRepository {
         id: '1',
         userId: 'user-123',
         storyId: 'CUOREDILUCE',
-        state: 'active',
         progress: '50%',
         inventory: 'sword, shield',
         saveDate: new Date(),
@@ -97,7 +95,6 @@ export class GameSaveRepository {
         id: '2',
         userId: 'user-123',
         storyId: 'OMBREDELBUCO',
-        state: 'paused',
         progress: '30%',
         inventory: 'torch, map',
         saveDate: new Date(),
@@ -110,7 +107,6 @@ export class GameSaveRepository {
         id: '3',
         userId: 'user-456',
         storyId: 'FIAMMADIAVVENTURA',
-        state: 'completed',
         progress: '100%',
         inventory: 'golden crown',
         saveDate: new Date(),
@@ -123,7 +119,6 @@ export class GameSaveRepository {
         id: '4',
         userId: 'user-789',
         storyId: 'TERRADISOGNI',
-        state: 'active',
         progress: '70%',
         inventory: 'magic potion',
         saveDate: new Date(),
@@ -136,7 +131,6 @@ export class GameSaveRepository {
         id: '5',
         userId: 'user-123',
         storyId: 'LABIRINTODIMISTERI',
-        state: 'abandoned',
         progress: '10%',
         inventory: 'key fragment',
         saveDate: new Date(),

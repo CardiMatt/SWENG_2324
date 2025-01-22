@@ -2,6 +2,9 @@
   <v-app>
     <v-app-bar app>
       <v-toolbar-title>Adventures Master</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <SaveGame />
+      <!-- inserire pulsante per salvare e per fare logout -->
     </v-app-bar>
     <v-main>
       <v-container fluid>
@@ -25,6 +28,8 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
 import Memori from "./components/Memori.vue";
+import SaveGame from './components/SaveGame.vue';
+
 
 // Import dei tipi
 import type { MemoriConfig, GameSave } from "@/models/GameSave";
@@ -33,6 +38,7 @@ export default defineComponent({
   name: "App",
   components: {
     Memori,
+    SaveGame,
   },
   setup() {
     // Esempio di MemoriConfig
@@ -40,9 +46,9 @@ export default defineComponent({
       context: "AUTH:NON_AUTENTICATO,STORIA: NULL",
       initialQuestion: "Benvenuto"
     });
-
+    
     return {
-      someMemoriConfig
+      someMemoriConfig,
     };
   },
 });

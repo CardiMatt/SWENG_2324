@@ -9,7 +9,6 @@ export interface GameSave {
   id: string;
   userId: string;
   storyId: string;
-  state: string;
   progress: string;
   inventory: string;
   saveDate: Date;

@@ -7,7 +7,6 @@
         <p><strong>Storia:</strong> {{ save.storyId }}</p>
         <p><strong>Progresso:</strong> {{ save.progress }}</p>
         <p><strong>Data:</strong> {{ new Date(save.saveDate).toLocaleString() }}</p>
-        <p><strong>Stato:</strong> {{ save.state }}</p>
         <p><strong>Inventario:</strong> {{ save.inventory }}</p>
         <!-- Bottone per caricare il salvataggio -->
         <button @click="loadSave(save)">Carica</button>
