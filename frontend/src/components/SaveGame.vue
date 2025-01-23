@@ -1,3 +1,4 @@
+<!-- frontend\src\components\SaveGame.vue -->
 <template>
   <div class="save-game">
     <button class="btn btn-success" @click="saveProgress" :disabled="isSaving">
@@ -64,15 +65,16 @@ export default defineComponent({
 
         // Ottieni il Memory associato
         const matchedMemory: any = await aisuruService.getMemory(
-            typeof lastMatchedMemoryID === 'string'
-            ? lastMatchedMemoryID
-            : String(lastMatchedMemoryID)
-          );
-
+          typeof lastMatchedMemoryID === 'string'
+          ? lastMatchedMemoryID
+          : String(lastMatchedMemoryID)
+        );
+        
         const memoriConfig: MemoriConfig = {
-        context: progress, // Usa progress per il campo context
-        initialQuestion: matchedMemory.title
+          context: progress, // Usa progress per il campo context
+          initialQuestion: matchedMemory.memory.title // Accedi al titolo all'interno della proprietà memory
         };
+
         const docId = await GameSaveRepository.saveGameSave({
         userId: userId,
         storyId: storyId,
