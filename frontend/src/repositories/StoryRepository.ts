@@ -6,10 +6,11 @@ import type { Story } from '../models/Story';
 const storyCollection = collection(db, 'stories');
 
 export class StoryRepository {
-  // Create or update a story
-  static async saveStory(story: Story): Promise<void> {
+  // Create or update a story and returns id
+  static async saveStory(story: Story): Promise<string> {
     const storyRef = doc(storyCollection);
     await setDoc(storyRef, story);
+    return storyRef.id
   }
 
   // Retrieve a story by ID
