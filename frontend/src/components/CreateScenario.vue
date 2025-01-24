@@ -1,4 +1,9 @@
 <template>
+<!--
+  TODO - Da risolvere
+    1)l'invio negli hint causa il salvataggio diretto
+    2) fa un fake salvataggio, dice che salva ma non ritorna l'id
+-->
   <div class="container mt-5">
     <h2>Crea uno Scenario</h2>
     <form @submit.prevent="saveScenario">
@@ -268,4 +273,3 @@ export default defineComponent({
   max-width: 700px;
 }
 </style>
-
