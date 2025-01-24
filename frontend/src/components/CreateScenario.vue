@@ -5,6 +5,7 @@
       <!-- Titolo -->
       <div class="mb-3">
         <label for="title" class="form-label">Titolo</label>
+        <p>isFirstScenario: {{ isFirstScenario }}</p>
         <div v-if="!isFirstScenario">
           <select
             id="title"
@@ -25,7 +26,7 @@
           class="form-control"
           v-model="scenario.title"
           :readonly="isFirstScenario"
-          placeholder="Titolo dello scenario"
+          placeholder="isFirstScenario"
         />
       </div>
 
@@ -140,7 +141,7 @@ export default defineComponent({
     },
     initialHints: {
       type: Array as () => string[],
-      default: () => [],
+      default: () => ["00001"],
     },
   },
   data() {
