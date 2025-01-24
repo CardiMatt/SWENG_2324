@@ -3,54 +3,64 @@
     <h1>Crea una nuova storia</h1>
 
     <!-- Dettagli della storia -->
-    <div class="mb-4">
-      <h3>Dettagli della storia</h3>
-      <form @submit.prevent="saveStory">
-        <div class="mb-3">
-          <label for="storyTitle" class="form-label">Titolo</label>
-          <input
-            type="text"
-            id="storyTitle"
-            class="form-control"
-            v-model="story.title"
-            required
-          />
-        </div>
-        <div class="mb-3">
-          <label for="storyDescription" class="form-label">Descrizione</label>
-          <textarea
-            id="storyDescription"
-            class="form-control"
-            rows="3"
-            v-model="story.description"
-            required
-          ></textarea>
-        </div>
-        <div class="mb-3">
-          <label for="storyImage" class="form-label">URL Immagine</label>
-          <input
-            type="text"
-            id="storyImage"
-            class="form-control"
-            v-model="story.image"
-            placeholder="Inserisci il link a un'immagine"
-          />
-        </div>
-        <div class="mb-3">
-          <label for="storyGenre" class="form-label">Genere</label>
-          <input
-            type="text"
-            id="storyGenre"
-            class="form-control"
-            v-model="story.genre"
-            placeholder="Es. Avventura, Fantascienza"
-          />
-        </div>
-        <button type="submit" class="btn btn-primary">
-          Salva Dettagli della Storia
-        </button>
-      </form>
+    <div v-if="!storySaved">
+        <h3>Dettagli della storia</h3>
+        <form @submit.prevent="saveStory">
+          <div class="mb-3">
+            <label for="storyTitle" class="form-label">Titolo</label>
+            <input
+              type="text"
+              id="storyTitle"
+              class="form-control"
+              v-model="story.title"
+              required
+            />
+          </div>
+          <div class="mb-3">
+            <label for="storyDescription" class="form-label">Descrizione</label>
+            <textarea
+              id="storyDescription"
+              class="form-control"
+              rows="3"
+              v-model="story.description"
+              required
+            ></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="storyImage" class="form-label">URL Immagine</label>
+            <input
+              type="text"
+              id="storyImage"
+              class="form-control"
+              v-model="story.image"
+              placeholder="Inserisci il link a un'immagine"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="storyGenre" class="form-label">Genere</label>
+            <input
+              type="text"
+              id="storyGenre"
+              class="form-control"
+              v-model="story.genre"
+              placeholder="Es. Avventura, Fantascienza"
+            />
+          </div>
+          <button type="submit" class="btn btn-primary">
+            Salva Dettagli della Storia
+          </button>
+        </form>
+      <!--</div>-->
     </div>
+     <!-- Componente CreateScenario -->
+     <CreateScenario
+        v-else
+        :storyTitle="story.title"
+        :storyId="storyId"
+        @finish="resetStory"
+    />
+    <!--:initialHints="initialHints"-->
+  
   </div>
 </template>
 
@@ -60,9 +70,11 @@ import type { Story } from "../models/Story";
 import { StoryRepository } from "../repositories/StoryRepository";
 import { getAuth } from "firebase/auth";
 import { AisuruService } from "@/services/AisuruService";
+import CreateScenario from "./CreateScenario.vue";
 
 export default defineComponent({
   name: "CreateStory",
+  components: { CreateScenario },
   emits: ["storySaved"],
   data() {
     return {
@@ -73,23 +85,25 @@ export default defineComponent({
         author: "",
         genre: "",
       } as Story,
+      storySaved: false,
+      storyId: "", // Memorizza l'ID della storia
       aisuruService: new AisuruService(), // Inizializza il servizio Aisuru
     };
   },
   methods: {
     async saveStory() {
       try {
-        //Id utente corrente TODO guarda se c'è già metodo nel repository
+        // Id utente corrente TODO guarda se c'è già metodo nel repository
         const auth = getAuth();
         const currentUser = auth.currentUser;
         if (!currentUser) {
           throw new Error("Utente non autenticato");
         }
 
-        //autore utente corrente
+        // autore utente corrente
         this.story.author = currentUser.uid;
 
-        // Controlla lo stato della sessione
+        // Controllo stato sessione
         try {
           const isGiver = await this.aisuruService.isGiverSession();
           if (isGiver) {
@@ -100,18 +114,23 @@ export default defineComponent({
         }
 
 
-        //Salvataggio storia
+        // Salvataggio storia
         const storyId = await StoryRepository.saveStory(this.story);
+        console.log("Storia salvata con ID:", storyId);
         alert(`Storia salvata con successo! ID: ${storyId}`);
 
-        //Emissione evento con l'Id della storia salvata
-        this.$emit("storySaved", storyId);
+        this.storySaved = true;
+        this.storyId = storyId; 
+
       } catch (error) {
         console.error("Errore durante il salvataggio della storia:", error);
         alert("Errore durante il salvataggio. Riprova.");
       }
     },
-    resetForm() {
+    // Reset stato componente
+    resetStory() {
+      this.storySaved = false;
+      this.storyId = "";
       this.story = {
         id: "",
         title: "",
