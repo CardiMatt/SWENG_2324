@@ -155,6 +155,10 @@ export default defineComponent({
         return;
       }
 
+      const contextVarsToSetParsed = JSON.parse(this.scenario.contextVarsToSet || "[]");
+      const contextVarsToMatchParsed = JSON.parse(this.scenario.contextVarsToMatch || "[]");
+
+      
       const memory = {
         title: this.scenario.title,
         answers: [
@@ -168,11 +172,17 @@ export default defineComponent({
         notPickable: this.scenario.notPickable,
         help: this.scenario.help,
         hints: this.scenario.hints,
-        contextVarsToSet: JSON.parse(this.scenario.contextVarsToSet || "[]"),
-        contextVarsToMatch: JSON.parse(this.scenario.contextVarsToMatch || "[]"),
+        ...(contextVarsToSetParsed.length > 0 && { contextVarsToSet: contextVarsToSetParsed }),
+    ...(contextVarsToMatchParsed.length > 0 && { contextVarsToMatch: contextVarsToMatchParsed }),
+ 
+        //contextVarsToSet: JSON.parse(this.scenario.contextVarsToSet || "[]"),
+        //contextVarsToMatch: JSON.parse(this.scenario.contextVarsToMatch || "[]"),
       };
 
-      const memoryID = await this.aisuruService.addMemory(memory);
+
+
+      //const memoryID = await this.aisuruService.addMemory(memory);
+      const memoryID = await this.aisuruService.addMemoryEndPoint2(memory);
       console.log("Memoria salvata con ID:", memoryID);
 
       this.prepareNextScenario();
@@ -181,7 +191,7 @@ export default defineComponent({
     prepareNextScenario() {
       const currentTitle = this.scenario.title;
       this.availableHints = this.availableHints.filter((hint) => hint !== currentTitle);
-      
+
       this.scenario = {
         title: this.availableHints[0] || "", // Il primo hint disponibile diventa il titolo
         answer: {
