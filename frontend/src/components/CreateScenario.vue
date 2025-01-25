@@ -70,7 +70,7 @@
           class="form-control"
           v-model="newHint"
           placeholder="Inserisci un hint e premi Invio"
-          @keyup.enter="addHint"
+           @keydown.enter.prevent="addHint"
         />
         <ul class="list-group mt-2">
           <li
