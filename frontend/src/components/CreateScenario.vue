@@ -10,8 +10,7 @@
       <!-- Titolo -->
       <div class="mb-3">
         <label for="title" class="form-label">Titolo</label>
-        <p>isFirstScenario: {{ isFirstScenario }}</p>
-        <div v-if="!isFirstScenario">
+        <div>
           <select
             id="title"
             class="form-select"
@@ -24,15 +23,6 @@
             </option>
           </select>
         </div>
-        <input
-          v-else
-          type="text"
-          id="title"
-          class="form-control"
-          v-model="scenario.title"
-          :readonly="isFirstScenario"
-          placeholder="isFirstScenario"
-        />
       </div>
 
       <!-- Answers -->
@@ -61,7 +51,7 @@
         </label>
       </div>
 
-      <!-- Hints -->
+      <!-- Hints
       <div class="mb-3">
         <label for="hints" class="form-label">Hints</label>
         <input
@@ -88,6 +78,37 @@
           </li>
         </ul>
       </div>
+       -->
+      <!-- Hints -->
+<div class="mb-3">
+  <label for="hints" class="form-label">Hints</label>
+  <div class="input-group">
+    <input
+      type="text"
+      id="hints"
+      class="form-control"
+      v-model="newHint"
+      placeholder="Inserisci un hint"
+    />
+    <button class="btn btn-primary" type="button" @click="addHint">Aggiungi Hint</button>
+  </div>
+  <ul class="list-group mt-2">
+    <li
+      v-for="(hint, index) in scenario.hints"
+      :key="index"
+      class="list-group-item d-flex justify-content-between align-items-center"
+    >
+      {{ hint }}
+      <button
+        class="btn btn-sm btn-danger"
+        @click="removeHint(index)"
+      >
+        Rimuovi
+      </button>
+    </li>
+  </ul>
+</div>
+
 
       <!-- Context Vars to Set -->
       <div class="mb-3">
@@ -136,6 +157,124 @@ import { AisuruService } from "@/services/AisuruService";
 
 export default defineComponent({
   props: {
+    storyTitle: {
+      type: String,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      aisuruService: new AisuruService(),
+      availableHints: ["0001"], // Inizialmente solo "0001"
+      scenario: {
+        title: "0001", // Titolo predefinito per il primo scenario
+        answer: {
+          text: "",
+          preformatted: true,
+        },
+        memoryType: "Question",
+        conclusive: true,
+        notPickable: true,
+        help: true,
+        hints: [] as string[],
+        contextVarsToSet: "",
+        contextVarsToMatch: "",
+        isFinal: false,
+      },
+      newHint: "", // Input temporaneo per un nuovo hint
+    };
+  },
+  methods: {
+    addHint() {
+      if (this.newHint.trim() && !this.scenario.hints.includes(this.newHint)) {
+        this.scenario.hints.push(this.newHint.trim());
+        this.availableHints.push(this.newHint.trim()); // Aggiungi l'hint alla lista disponibile
+        this.newHint = ""; // Resetta l'input
+      }
+    },
+
+    removeHint(index: number) {
+      this.scenario.hints.splice(index, 1);
+    },
+
+    async saveScenario() {
+      if (!this.scenario.title) {
+        alert("Inserisci un titolo per lo scenario!");
+        return;
+      }
+
+      try {
+        let contextVarsToSet = [];
+        if (this.scenario.contextVarsToSet.trim()) {
+          contextVarsToSet = JSON.parse(this.scenario.contextVarsToSet);
+          if (!Array.isArray(contextVarsToSet)) {
+            throw new Error("contextVarsToSet deve essere un array JSON.");
+          }
+        }
+
+        if (this.scenario.isFinal && !contextVarsToSet.includes("FINAL")) {
+          contextVarsToSet.push("FINAL");
+        }
+
+        this.scenario.contextVarsToSet = JSON.stringify(contextVarsToSet, null, 2);
+      } catch (error) {
+        alert(`Errore nel campo Context Vars to Set`);
+        return;
+      }
+
+      const memory = {
+        title: this.scenario.title,
+        answers: [
+          {
+            text: this.scenario.answer.text,
+            preformatted: this.scenario.answer.preformatted,
+          },
+        ],
+        memoryType: 'Question' as 'Question',
+        conclusive: this.scenario.conclusive,
+        notPickable: this.scenario.notPickable,
+        help: this.scenario.help,
+        hints: this.scenario.hints,
+        contextVarsToSet: JSON.parse(this.scenario.contextVarsToSet || "[]"),
+        contextVarsToMatch: JSON.parse(this.scenario.contextVarsToMatch || "[]"),
+      };
+
+      const memoryID = await this.aisuruService.addMemory(memory);
+      console.log("Memoria salvata con ID:", memoryID);
+
+      this.prepareNextScenario();
+    },
+
+    prepareNextScenario() {
+      this.scenario = {
+        title: this.availableHints[0] || "", // Il primo hint disponibile diventa il titolo
+        answer: {
+          text: "",
+          preformatted: true,
+        },
+        memoryType: "Question",
+        conclusive: true,
+        notPickable: true,
+        help: true,
+        hints: [],
+        contextVarsToSet: "",
+        contextVarsToMatch: "",
+        isFinal: false,
+      };
+    },
+
+    finishInsertion() {
+      alert("Inserimento scenari completato!");
+      this.$emit("finish");
+    },
+  },
+});
+/*
+import { defineComponent } from "vue";
+import { AisuruService } from "@/services/AisuruService";
+
+export default defineComponent({
+  props: {
     isFirstScenario: {
       type: Boolean,
       default: false,
@@ -152,6 +291,8 @@ export default defineComponent({
   data() {
     return {
       aisuruService: new AisuruService(),
+      allHints: this.initialHints.slice(), // Lista completa di hint (statici e aggiunti)
+      availableHints: this.initialHints.slice(), // Lista filtrata di hint disponibili
       scenario: {
         title: this.isFirstScenario ? "00001" : "",
         answer: {
@@ -168,16 +309,35 @@ export default defineComponent({
         isFinal: false, // Controllo per "Scenario Finale"
       },
       newHint: "", // Hint temporaneo
-      availableHints: this.initialHints, // Lista degli hints disponibili
+      //availableHints: this.initialHints, // Lista degli hints disponibili
     };
   },
   methods: {
+    //addHint() {
+     // if (this.newHint.trim() && !this.scenario.hints.includes(this.newHint)) {
+     //   this.scenario.hints.push(this.newHint.trim());
+     //   this.newHint = "";
+     // }
+   // },
     addHint() {
-      if (this.newHint.trim() && !this.scenario.hints.includes(this.newHint)) {
-        this.scenario.hints.push(this.newHint.trim());
-        this.newHint = "";
-      }
-    },
+  if (this.newHint.trim() && !this.scenario.hints.includes(this.newHint)) {
+    this.scenario.hints.push(this.newHint.trim());
+
+    // Aggiungi l'hint alla lista globale se non è già presente
+    if (!this.allHints.includes(this.newHint.trim())) {
+      this.allHints.push(this.newHint.trim());
+    }
+
+    // Aggiorna solo gli hint disponibili senza interferire con il titolo
+    this.availableHints = this.allHints.filter(
+      (hint) => !this.scenario.hints.includes(hint) && hint !== this.scenario.title
+    );
+
+    this.newHint = ""; // Resetta l'input
+  }
+},
+
+
     removeHint(index: number) {
       this.scenario.hints.splice(index, 1);
     },
@@ -210,7 +370,6 @@ export default defineComponent({
         return;
       }
 
-      //**TODO Richiamare salvataggio scenario */
       // Crea l'oggetto memoria da salvare
       const memory = {
           title: this.scenario.title,
@@ -232,8 +391,13 @@ export default defineComponent({
         console.log("Memoria salvata con ID:", memoryID);
 
       // Rimuovi il titolo dagli hints disponibili
-      this.availableHints = this.availableHints.filter(
-        (hint) => hint !== this.scenario.title
+      //this.availableHints = this.availableHints.filter(
+       // (hint) => hint !== this.scenario.title
+      //);
+       // Aggiorna la lista degli hint disponibili
+      this.availableHints = this.allHints.filter(
+        (hint) =>
+          !this.scenario.hints.includes(hint) && hint !== this.scenario.title
       );
 
       
@@ -244,7 +408,8 @@ export default defineComponent({
     },
     resetForm() {
       this.scenario = {
-        title: "",
+        //title: "",
+        ...this.scenario, // Mantieni il titolo attuale
         answer: {
           text: "",
           preformatted: true,
@@ -258,6 +423,12 @@ export default defineComponent({
         contextVarsToMatch: "",
         isFinal: false,
       };
+
+        // Ripristina gli hint disponibili
+      this.availableHints = this.allHints.filter(
+        (hint) =>
+          !this.scenario.hints.includes(hint) && hint !== this.scenario.title
+      );
     },
     finishInsertion() {
       alert("Inserimento scenari completato!");
@@ -266,6 +437,7 @@ export default defineComponent({
     },
   },
 });
+*/
 </script>
 
 <style scoped>
