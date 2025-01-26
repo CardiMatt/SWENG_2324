@@ -1,6 +1,9 @@
+<!-- frontend\src\components\Memori.vue -->
 <template>
-    <!-- Web Component di Memori -->
+  <div>
+    <!-- Usa una chiave dinamica per forzare il refresh del componente memori-client -->
     <memori-client
+      :key="refreshKey"
       memoriName="Adventures Master"
       ownerUserName="matteocardinale2002"
       memoriID="fa22537f-6cd4-45f9-b21e-347747222db6"
@@ -27,55 +30,69 @@
       showUpload="false"
       autoStart="true"
       enableAudio="true"
-      context="AUTH:NON_AUTENTICATO,STORIA:NULL"
       integrationID="5f2ab2ab-5574-4ec6-9034-fd5fb948a449"
-      initialQuestion="Benvenuto"
-    ></memori-client>
+      :context="finalMemoriConfig.context"
+      :initialQuestion="finalMemoriConfig.initialQuestion"
+    />
+  </div>
 </template>
-<style>
-    .memori--global-background {
-    pointer-events: none; /* Disabilita l'interazione con il background */
-    }
-
-    
-    /*#chat-fieldset {*/
-    /*display: none;  Nasconde completamente l'elemento */
-    /*pointer-events: none;  Disabilita l'interazione con il puntatore */
-    /* user-select: none; Impedisce la selezione del contenuto */
-    /*}*/
-</style>
 
 <script setup lang="ts">
-</script>
+import { ref, computed } from 'vue';
+import type { MemoriConfig, GameSave } from '@/models/GameSave';
+import { onMounted, onUnmounted } from 'vue';
+import eventBus from '@/eventBus';
 
-<!-- 
+// Props
+const props = defineProps<{
+  memoriConfig?: MemoriConfig;
+  gameSaveData?: GameSave;
+}>();
+
+onMounted(() => {
+  eventBus.on('updateMemoriConfig', (newConfig) => {
+    refreshMemori(newConfig);
+  });
+});
+
+onUnmounted(() => {
+  eventBus.off('updateMemoriConfig');
+});
+
+// Fallback default configuration
+const defaultMemoriConfig: MemoriConfig = {
+  context: 'AUTH:NON_AUTENTICATO,STORIA:NULL',
+  initialQuestion: 'Benvenuto',
+};
+
+// Reactive key for forcing a refresh
+const refreshKey = ref(0);
+
+// Final configuration based on props
+const finalMemoriConfig = computed<MemoriConfig>(() => {
+  if (props.gameSaveData && props.gameSaveData.memoriConfig) {
+    return props.gameSaveData.memoriConfig;
+  } else if (props.memoriConfig) {
+    return props.memoriConfig;
+  }
+  return defaultMemoriConfig;
+});
+
 /**
- * Dispatches a MemoriTextEntered event to simulate a user typing a message
- * @param message The text message to send
- * @param waitForPrevious Whether to wait for previous message to finish before sending (default true)
- * @param hidden Whether to hide the message from chat history (default false)
- * @param typingText Optional custom typing indicator text
- * @param useLoaderTextAsMsg Whether to use the loader text as the message (default false)
- * @param hasBatchQueued Whether there are more messages queued to be sent (default false)
+ * Expose a method to refresh the MemoriClient with a new config
+ * @param newConfig New MemoriConfig object
  */
-const typeMessage = (
-  message: string,
-  waitForPrevious = true,
-  hidden = false,
-  typingText?: string,
-  useLoaderTextAsMsg = false,
-  hasBatchQueued = false
-) => {
+function refreshMemori(newConfig: MemoriConfig) {
+  // Aggiorna la configurazione direttamente dalle props
+  if (props.memoriConfig) {
+    Object.assign(props.memoriConfig, newConfig);
+  }
+  // Incrementa la chiave di refresh per forzare il ri-render
+  refreshKey.value += 1;
+}
 
----
-
-const typeBatchMessages = (
-  messages: {
-    message: string;
-    waitForPrevious?: boolean;
-    hidden?: boolean;
-    typingText?: string;
-    useLoaderTextAsMsg?: boolean;
-  }[]
-) 
--->
+// Esponi il metodo per i componenti genitori
+defineExpose({
+  refreshMemori,
+});
+</script>

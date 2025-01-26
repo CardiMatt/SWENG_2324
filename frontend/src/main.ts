@@ -74,5 +74,10 @@ declare global {
         useLoaderTextAsMsg?: boolean;
       }[]
     ) => void;
+
+    getMemoriState: (
+      integrationId?: string,
+    ) => object;
+
   }
 }  
