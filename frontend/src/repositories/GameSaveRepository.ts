@@ -21,13 +21,13 @@ export class GameSaveRepository {
    * @param gameSave Oggetto GameSave da salvare.
    * @returns L'ID del documento salvato.
    */
-  static async saveGameSave(gameSave: GameSave): Promise<string> {
+  static async saveGameSave(gameSave: Omit<GameSave, 'id'>): Promise<string> {
     try {
-      const gameSaveRef = doc(gameSaveCollection, gameSave.id);
-      await setDoc(gameSaveRef, gameSave);
-      return gameSave.id;
+      // Usa addDoc per salvare un nuovo documento e lasciare che Firebase generi l'ID
+      const docRef = await addDoc(gameSaveCollection, gameSave);
+      return docRef.id; // Restituisci l'ID generato da Firebase
     } catch (error) {
-      console.error('Errore durante la creazione o aggiornamento del salvataggio:', error);
+      console.error('Errore durante la creazione del salvataggio:', error);
       throw new Error('Non è stato possibile salvare il salvataggio.');
     }
   }

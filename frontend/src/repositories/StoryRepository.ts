@@ -4,6 +4,7 @@ import {
   setDoc,
   getDoc,
   getDocs,
+  addDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -17,11 +18,25 @@ const storyCollection = collection(db, 'stories');
 export class StoryRepository {
   /**
    * Crea o aggiorna una storia.
-   * @param story Oggetto Story da salvare o aggiornare.
+   * @param story Oggetto Story da salvare (senza id) o aggiornare (con id).
+   * @returns L'id del documento salvato o aggiornato.
    */
-  static async saveStory(story: Story): Promise<void> {
-    const storyRef = doc(storyCollection, story.id);
-    await setDoc(storyRef, story);
+  static async saveStory(story: Omit<Story, 'id'> | Story): Promise<string> {
+    try {
+      if ('id' in story && story.id) {
+        // Aggiorna una storia esistente
+        const storyRef = doc(storyCollection, story.id);
+        await setDoc(storyRef, story);
+        return story.id;
+      } else {
+        // Crea una nuova storia e genera l'id automaticamente
+        const docRef = await addDoc(storyCollection, story);
+        return docRef.id;
+      }
+    } catch (error) {
+      console.error('Errore durante la creazione o aggiornamento della storia:', error);
+      throw new Error('Non è stato possibile salvare la storia.');
+    }
   }
 
   /**
