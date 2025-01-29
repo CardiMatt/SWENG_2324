@@ -3,6 +3,7 @@
   TODO - Da risolvere
     aggiungere tag con titolo storia
     contextVarToSet (FINALE, OGGETTO:LIBRO)
+    !!finale è un'etichetta
     contextVarToMatch AUTH:AUTENTICATO, STORIA:TITOLO (OGGETTO:NOMEOGG)
 
     ESEMPIO
@@ -53,11 +54,9 @@ Prova compilata
     {
       "text": "risppstaa",
       "preformatted": true,
-      "creationTimestamp": "2025-01-29T10:48:34.753Z",
     }
   ],
   "date": "2025-01-29T10:48:34.753Z",
-  "placeName": "cus el",
   "conclusive": true,
   "notPickable": true,
   "help": false,
@@ -135,7 +134,8 @@ Prova compilata
           Context Vars to Set (JSON)
         </label>
         <textarea id="contextVarsToSet" class="form-control" v-model="scenario.contextVarsToSet" rows="3"
-          placeholder='{"key1": "value1", "key2": "value2"}'></textarea>
+          placeholder='{"additionalProp1": "prop1ToSet","additionalProp2": "prop2ToSet"}'>
+        </textarea>
       </div>
 
       <!-- Context Vars to Match -->
@@ -144,7 +144,7 @@ Prova compilata
           Context Vars to Match (JSON)
         </label>
         <textarea id="contextVarsToMatch" class="form-control" v-model="scenario.contextVarsToMatch" rows="3"
-          placeholder='{"key1": "value1", "key2": "value2"}'></textarea>
+          placeholder='{"additionalProp1": "prop1ToMatch","additionalProp2": "prop2ToMatch"}'></textarea>
       </div>
 
       <!-- Pulsanti -->
@@ -184,10 +184,10 @@ export default defineComponent({
         memoryType: "Question",
         conclusive: true,
         notPickable: true,
-        help: true,
+        help: false,
         hints: [] as string[],
-        contextVarsToSet: "",
-        contextVarsToMatch: "",
+        contextVarsToSet: "{}",
+        contextVarsToMatch: "{}",
         isFinal: false,
       },
       newHint: "", // Input temporaneo per un nuovo hint
@@ -211,9 +211,30 @@ export default defineComponent({
         alert("Inserisci un titolo per lo scenario!");
         return;
       }
+      let contextVarsToSet = null;
+      let contextVarsToMatch = null;
 
       try {
-        let contextVarsToSet = [];
+        
+
+         // Popola contextVarsToSet
+        if (this.scenario.contextVarsToSet.trim()) {
+          const parsed = JSON.parse(this.scenario.contextVarsToSet);
+          if (typeof parsed !== 'object' || Array.isArray(parsed)) {
+            throw new Error("contextVarsToSet deve essere un oggetto JSON.");
+          }
+          contextVarsToSet = parsed;
+        }
+
+        // Popola contextVarsToMatch
+        if (this.scenario.contextVarsToMatch.trim()) {
+          contextVarsToMatch = JSON.parse(this.scenario.contextVarsToMatch);
+          if (typeof contextVarsToMatch !== 'object' || Array.isArray(contextVarsToMatch)) {
+            throw new Error("contextVarsToMatch deve essere un oggetto JSON.");
+          }
+        }
+
+        /*
         if (this.scenario.contextVarsToSet.trim()) {
           contextVarsToSet = JSON.parse(this.scenario.contextVarsToSet);
           if (!Array.isArray(contextVarsToSet)) {
@@ -224,18 +245,24 @@ export default defineComponent({
         if (this.scenario.isFinal && !contextVarsToSet.includes("FINAL")) {
           contextVarsToSet.push("FINAL");
         }
+          */
 
+       // this.scenario.contextVarsToSet = JSON.stringify(contextVarsToSet, null, 2);
+      if (contextVarsToSet !== null) {
         this.scenario.contextVarsToSet = JSON.stringify(contextVarsToSet, null, 2);
+      }
+        this.scenario.contextVarsToMatch = JSON.stringify(contextVarsToMatch, null, 2);
       } catch (error) {
         alert(`Errore nel campo Context Vars to Set`);
         return;
       }
 
-      const contextVarsToSetParsed = JSON.parse(this.scenario.contextVarsToSet || "[]");
-      const contextVarsToMatchParsed = JSON.parse(this.scenario.contextVarsToMatch || "[]");
+      //const contextVarsToSetParsed = JSON.parse(this.scenario.contextVarsToSet || "{}");
+      const contextVarsToMatchParsed = JSON.parse(this.scenario.contextVarsToMatch || "{}");
 
       
       const memory = {
+        memoryType: 'Question' as 'Question',
         title: this.scenario.title,
         answers: [
           {
@@ -243,14 +270,14 @@ export default defineComponent({
             preformatted: this.scenario.answer.preformatted,
           },
         ],
-        memoryType: 'Question' as 'Question',
+        date: new Date().toISOString(),
         conclusive: this.scenario.conclusive,
         notPickable: this.scenario.notPickable,
         help: this.scenario.help,
         hints: this.scenario.hints,
-        ...(contextVarsToSetParsed.length > 0 && { contextVarsToSet: contextVarsToSetParsed }),
-    ...(contextVarsToMatchParsed.length > 0 && { contextVarsToMatch: contextVarsToMatchParsed }),
- 
+        ...(contextVarsToSet !== null && { contextVarsToSet }),
+        ...(contextVarsToMatchParsed.length > 0 && { contextVarsToMatch: contextVarsToMatchParsed }),
+        tags: [this.storyTitle],
         //contextVarsToSet: JSON.parse(this.scenario.contextVarsToSet || "[]"),
         //contextVarsToMatch: JSON.parse(this.scenario.contextVarsToMatch || "[]"),
       };
@@ -277,7 +304,7 @@ export default defineComponent({
         memoryType: "Question",
         conclusive: true,
         notPickable: true,
-        help: true,
+        help: false,
         hints: [],
         contextVarsToSet: "",
         contextVarsToMatch: "",
