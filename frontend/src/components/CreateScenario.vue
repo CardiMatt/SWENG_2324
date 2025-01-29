@@ -1,10 +1,10 @@
 <template>
   <!--
   TODO - Da risolvere
-    aggiungere tag con titolo storia
     contextVarToSet (FINALE, OGGETTO:LIBRO)
     !!finale è un'etichetta
     contextVarToMatch AUTH:AUTENTICATO, STORIA:TITOLO (OGGETTO:NOMEOGG)
+    se metto oggeto non mette nome storia.
 
     ESEMPIO
     {
@@ -186,8 +186,8 @@ export default defineComponent({
         notPickable: true,
         help: false,
         hints: [] as string[],
-        contextVarsToSet: "{}",
-        contextVarsToMatch: "{}",
+        contextVarsToSet: "",//metti storia nomestoria
+        contextVarsToMatch: "",
         isFinal: false,
       },
       newHint: "", // Input temporaneo per un nuovo hint
@@ -211,11 +211,27 @@ export default defineComponent({
         alert("Inserisci un titolo per lo scenario!");
         return;
       }
-      let contextVarsToSet = null;
-      let contextVarsToMatch = null;
+      //let contextVarsToSet = null;
+      //let contextVarsToMatch = { "AUTH": "AUTENTICATO" };
+      let contextVarsToSet: { [key: string]: string } = {};
+      let contextVarsToMatch: { [key: string]: string } = { "AUTH": "AUTENTICATO" }; //Sempre presente AUTH
+
 
       try {
-        
+
+         //Se il titolo è "0001", imposta STORIA: TITOLSTORIA di default
+        if (this.scenario.title === "0001") {
+          contextVarsToSet = { "STORIA": this.storyTitle };
+        } else {
+          //Dal 2° scenario in poi, STORIA va nelle contextVarsToMatch
+          contextVarsToMatch = { ...contextVarsToMatch, "STORIA": this.storyTitle };
+        }
+
+        // Se lo scenario è finale, aggiunge "FINALE" alle contextVarsToSet
+        if (this.scenario.isFinal) {
+          contextVarsToSet["FINALE"] = "true"; // "true" è simbolico, può essere vuoto ""
+        }
+        /**TODO qui si potrebbe mettere un pattern per evitare tutti questi if else? boh */
 
          // Popola contextVarsToSet
         if (this.scenario.contextVarsToSet.trim()) {
@@ -223,44 +239,34 @@ export default defineComponent({
           if (typeof parsed !== 'object' || Array.isArray(parsed)) {
             throw new Error("contextVarsToSet deve essere un oggetto JSON.");
           }
-          contextVarsToSet = parsed;
+          //contextVarsToSet = parsed;
+          contextVarsToSet = { ...contextVarsToSet, ...parsed }; //Merge con eventuali altri valori
+    
         }
 
-        // Popola contextVarsToMatch
+         // Popola contextVarsToMatch
         if (this.scenario.contextVarsToMatch.trim()) {
-          contextVarsToMatch = JSON.parse(this.scenario.contextVarsToMatch);
-          if (typeof contextVarsToMatch !== 'object' || Array.isArray(contextVarsToMatch)) {
+          const parsed = JSON.parse(this.scenario.contextVarsToMatch);
+          if (typeof parsed !== 'object' || Array.isArray(parsed)) {
             throw new Error("contextVarsToMatch deve essere un oggetto JSON.");
           }
+          //contextVarsToMatch = parsed;
+          contextVarsToMatch = { ...parsed, "AUTH": "AUTENTICATO" }; // Merge con AUTH: AUTENTICATO
+          //TODO se ne ho altri già settati non li mette?
         }
 
-        /*
-        if (this.scenario.contextVarsToSet.trim()) {
-          contextVarsToSet = JSON.parse(this.scenario.contextVarsToSet);
-          if (!Array.isArray(contextVarsToSet)) {
-            throw new Error("contextVarsToSet deve essere un array JSON.");
-          }
+        if (contextVarsToSet !== null) {
+          this.scenario.contextVarsToSet = JSON.stringify(contextVarsToSet, null, 2);
         }
 
-        if (this.scenario.isFinal && !contextVarsToSet.includes("FINAL")) {
-          contextVarsToSet.push("FINAL");
+        if (contextVarsToMatch !== null) {
+          this.scenario.contextVarsToMatch = JSON.stringify(contextVarsToMatch, null, 2);
         }
-          */
-
-       // this.scenario.contextVarsToSet = JSON.stringify(contextVarsToSet, null, 2);
-      if (contextVarsToSet !== null) {
-        this.scenario.contextVarsToSet = JSON.stringify(contextVarsToSet, null, 2);
-      }
-        this.scenario.contextVarsToMatch = JSON.stringify(contextVarsToMatch, null, 2);
       } catch (error) {
         alert(`Errore nel campo Context Vars to Set`);
         return;
       }
-
-      //const contextVarsToSetParsed = JSON.parse(this.scenario.contextVarsToSet || "{}");
-      const contextVarsToMatchParsed = JSON.parse(this.scenario.contextVarsToMatch || "{}");
-
-      
+ 
       const memory = {
         memoryType: 'Question' as 'Question',
         title: this.scenario.title,
@@ -276,15 +282,12 @@ export default defineComponent({
         help: this.scenario.help,
         hints: this.scenario.hints,
         ...(contextVarsToSet !== null && { contextVarsToSet }),
-        ...(contextVarsToMatchParsed.length > 0 && { contextVarsToMatch: contextVarsToMatchParsed }),
+        contextVarsToMatch, //Assicurato sempre presente con AUTH: AUTENTICATO
+        //...(contextVarsToMatch !== null && { contextVarsToMatch }),
         tags: [this.storyTitle],
-        //contextVarsToSet: JSON.parse(this.scenario.contextVarsToSet || "[]"),
-        //contextVarsToMatch: JSON.parse(this.scenario.contextVarsToMatch || "[]"),
       };
 
 
-
-      //const memoryID = await this.aisuruService.addMemory(memory);
       const memoryID = await this.aisuruService.addMemory(memory);
       console.log("Memoria salvata con ID:", memoryID);
 
