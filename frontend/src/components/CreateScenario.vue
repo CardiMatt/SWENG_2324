@@ -1,7 +1,83 @@
 <template>
   <!--
   TODO - Da risolvere
-    2) fa un fake salvataggio, dice che salva ma non ritorna l'id
+    aggiungere tag con titolo storia
+    contextVarToSet (FINALE, OGGETTO:LIBRO)
+    contextVarToMatch AUTH:AUTENTICATO, STORIA:TITOLO (OGGETTO:NOMEOGG)
+
+    ESEMPIO
+    {
+  "memoryID": "string",
+  "memoryType": "string",
+  "title": "string",
+  "answers": [
+    {
+      "text": "string",
+      "preformatted": true,
+      "creationTimestamp": "2025-01-29T10:48:34.753Z",
+      "creationSessionID": "string",
+      "lastChangeTimestamp": "2025-01-29T10:48:34.753Z",
+      "lastChangeSessionID": "string"
+    }
+  ],
+  "date": "2025-01-29T10:48:34.753Z",
+  "placeName": "string",
+  "conclusive": true,
+  "notPickable": true,
+  "help": false,
+  "hints": [
+    "string"
+  ],
+  "contextVarsToSet": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "contextVarsToMatch": {
+    "additionalProp1": "string",
+    "additionalProp2": "string",
+    "additionalProp3": "string"
+  },
+  "tags": [
+    "string"
+  ]
+}
+
+
+Prova compilata
+{
+  "memoryID": "5788e361-9bfa-4a03-a094-1d10c52a449d",
+  "memoryType": "Question",
+  "title": "Titolo",
+  "answers": [
+    {
+      "text": "risppstaa",
+      "preformatted": true,
+      "creationTimestamp": "2025-01-29T10:48:34.753Z",
+    }
+  ],
+  "date": "2025-01-29T10:48:34.753Z",
+  "placeName": "cus el",
+  "conclusive": true,
+  "notPickable": true,
+  "help": false,
+  "hints": [
+    "primoHint"
+  ],
+  "contextVarsToSet": {
+    "additionalProp1": "prpvaprop1toset",
+    "additionalProp2": "provaprop2toset",
+    "additionalProp3": "provaprop3toset"
+  },
+  "contextVarsToMatch": {
+    "additionalProp1": "prova1tomatch",
+    "additionalProp2": "prova2tomach",
+    "additionalProp3": "prova3tomatch"
+  },
+  "tags": [
+    "titoloStoriaTag"
+  ]
+}
 -->
   <div class="container mt-5">
     <h2>Crea uno Scenario</h2>
@@ -182,7 +258,7 @@ export default defineComponent({
 
 
       //const memoryID = await this.aisuruService.addMemory(memory);
-      const memoryID = await this.aisuruService.addMemoryEndPoint2(memory);
+      const memoryID = await this.aisuruService.addMemory(memory);
       console.log("Memoria salvata con ID:", memoryID);
 
       this.prepareNextScenario();
