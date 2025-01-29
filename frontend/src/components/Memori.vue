@@ -1,7 +1,6 @@
-<!-- frontend\src\components\Memori.vue -->
+<!-- frontend/src/components/Memori.vue -->
 <template>
   <div>
-    <!-- Usa una chiave dinamica per forzare il refresh del componente memori-client -->
     <memori-client
       :key="refreshKey"
       memoriName="Adventures Master"
@@ -50,7 +49,7 @@ const props = defineProps<{
 }>();
 
 onMounted(() => {
-  eventBus.on('updateMemoriConfig', (newConfig) => {
+  eventBus.on('updateMemoriConfig', (newConfig: MemoriConfig) => {
     refreshMemori(newConfig);
   });
 });

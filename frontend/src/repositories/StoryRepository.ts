@@ -48,7 +48,10 @@ export class StoryRepository {
     const storyRef = doc(storyCollection, storyId);
     const docSnapshot = await getDoc(storyRef);
     if (docSnapshot.exists()) {
-      return docSnapshot.data() as Story;
+      return {
+        id: docSnapshot.id, // Aggiungi l'id del documento
+        ...(docSnapshot.data() as Omit<Story, 'id'>)
+      };
     }
     return null;
   }
@@ -59,7 +62,10 @@ export class StoryRepository {
    */
   static async getAllStories(): Promise<Story[]> {
     const snapshot = await getDocs(storyCollection);
-    return snapshot.docs.map((doc) => doc.data() as Story);
+    return snapshot.docs.map((doc) => ({
+      id: doc.id, // Aggiungi l'id del documento
+      ...(doc.data() as Omit<Story, 'id'>) // Spread degli altri campi della storia
+    }));
   }
 
   /**
@@ -89,7 +95,10 @@ export class StoryRepository {
   static async getStoriesByGenre(genre: string): Promise<Story[]> {
     const genreQuery = query(storyCollection, where('genre', '==', genre));
     const snapshot = await getDocs(genreQuery);
-    return snapshot.docs.map((doc) => doc.data() as Story);
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Omit<Story, 'id'>)
+    }));
   }
 
   /**
@@ -100,6 +109,9 @@ export class StoryRepository {
   static async getStoriesByAuthor(author: string): Promise<Story[]> {
     const authorQuery = query(storyCollection, where('author', '==', author));
     const snapshot = await getDocs(authorQuery);
-    return snapshot.docs.map((doc) => doc.data() as Story);
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Omit<Story, 'id'>)
+    }));
   }
 }

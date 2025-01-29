@@ -1,10 +1,11 @@
+<!-- frontend/src/App.vue -->
 <template>
   <v-app>
     <v-app-bar app>
       <v-toolbar-title>Adventures Master</v-toolbar-title>
       <v-spacer></v-spacer>
       <SaveGame />
-      <!-- inserire pulsante per salvare e per fare logout -->
+      <Logout /> 
     </v-app-bar>
     <v-main>
       <v-container fluid>
@@ -29,7 +30,7 @@
 import { defineComponent, ref } from 'vue';
 import Memori from "./components/Memori.vue";
 import SaveGame from './components/SaveGame.vue';
-
+import Logout from './components/Logout.vue'; // Import del componente Logout
 
 // Import dei tipi
 import type { MemoriConfig, GameSave } from "@/models/GameSave";
@@ -39,6 +40,7 @@ export default defineComponent({
   components: {
     Memori,
     SaveGame,
+    Logout, // Registrazione del componente Logout
   },
   setup() {
     // Esempio di MemoriConfig

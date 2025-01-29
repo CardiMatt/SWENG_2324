@@ -53,7 +53,7 @@ export default defineComponent({
     });
 
     // Fetch stories from repository
-    StoryRepository.getSampleStories().then((data) => {
+    StoryRepository.getAllStories().then((data) => {
       stories.value = data;
     });
 
