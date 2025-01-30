@@ -1,4 +1,7 @@
 <template>
+  <!--TODO
+  - salvataggio immagine, come?
+  -->
   <div class="container mt-5">
     <h1>Crea una nuova storia</h1>
 
@@ -59,7 +62,6 @@
         :storyId="storyId"
         @finish="resetStory"
     />
-    <!--:initialHints="initialHints"-->
   
   </div>
 </template>
@@ -105,10 +107,7 @@ export default defineComponent({
 
         // Controllo stato sessione
         try {
-          const isGiver = await this.aisuruService.isGiverSession();
-          if (isGiver) {
-            console.log("Sessione da giver attivata con successo.");
-          }
+          this.aisuruService.checkEnsureSession();
         } catch (error) {
           console.error("Errore nel verificare/creare una sessione da giver:", error);
         }

@@ -1,10 +1,9 @@
 <template>
   <!--
   TODO - Da risolvere
-    contextVarToSet (FINALE, OGGETTO:LIBRO)
-    !!finale è un'etichetta
-    contextVarToMatch AUTH:AUTENTICATO, STORIA:TITOLO (OGGETTO:NOMEOGG)
-    se metto oggeto non mette nome storia.
+    - contextVarToSet FINALE (etichetta) non trovo come metterlo come etichetta
+    - immagine oggetto? come?
+    - termina inserimento..typeHiddenMessage con torna al menù?
 
     ESEMPIO
     {
@@ -186,7 +185,7 @@ export default defineComponent({
         notPickable: true,
         help: false,
         hints: [] as string[],
-        contextVarsToSet: "",//metti storia nomestoria
+        contextVarsToSet: "",
         contextVarsToMatch: "",
         isFinal: false,
       },
@@ -211,19 +210,17 @@ export default defineComponent({
         alert("Inserisci un titolo per lo scenario!");
         return;
       }
-      //let contextVarsToSet = null;
-      //let contextVarsToMatch = { "AUTH": "AUTENTICATO" };
+
       let contextVarsToSet: { [key: string]: string } = {};
       let contextVarsToMatch: { [key: string]: string } = { "AUTH": "AUTENTICATO" }; //Sempre presente AUTH
-
 
       try {
 
          //Se il titolo è "0001", imposta STORIA: TITOLSTORIA di default
+         //Dal 2° scenario in poi, STORIA va nelle contextVarsToMatch
         if (this.scenario.title === "0001") {
           contextVarsToSet = { "STORIA": this.storyTitle };
         } else {
-          //Dal 2° scenario in poi, STORIA va nelle contextVarsToMatch
           contextVarsToMatch = { ...contextVarsToMatch, "STORIA": this.storyTitle };
         }
 
@@ -231,6 +228,7 @@ export default defineComponent({
         if (this.scenario.isFinal) {
           contextVarsToSet["FINALE"] = "true"; // "true" è simbolico, può essere vuoto ""
         }
+
         /**TODO qui si potrebbe mettere un pattern per evitare tutti questi if else? boh */
 
          // Popola contextVarsToSet
@@ -239,7 +237,6 @@ export default defineComponent({
           if (typeof parsed !== 'object' || Array.isArray(parsed)) {
             throw new Error("contextVarsToSet deve essere un oggetto JSON.");
           }
-          //contextVarsToSet = parsed;
           contextVarsToSet = { ...contextVarsToSet, ...parsed }; //Merge con eventuali altri valori
     
         }
@@ -250,9 +247,7 @@ export default defineComponent({
           if (typeof parsed !== 'object' || Array.isArray(parsed)) {
             throw new Error("contextVarsToMatch deve essere un oggetto JSON.");
           }
-          //contextVarsToMatch = parsed;
-          contextVarsToMatch = { ...parsed, "AUTH": "AUTENTICATO" }; // Merge con AUTH: AUTENTICATO
-          //TODO se ne ho altri già settati non li mette?
+          contextVarsToMatch = {  ...contextVarsToMatch, ...parsed  }; // Merge completo
         }
 
         if (contextVarsToSet !== null) {
@@ -283,7 +278,6 @@ export default defineComponent({
         hints: this.scenario.hints,
         ...(contextVarsToSet !== null && { contextVarsToSet }),
         contextVarsToMatch, //Assicurato sempre presente con AUTH: AUTENTICATO
-        //...(contextVarsToMatch !== null && { contextVarsToMatch }),
         tags: [this.storyTitle],
       };
 
@@ -317,7 +311,7 @@ export default defineComponent({
 
     finishInsertion() {
       alert("Inserimento scenari completato!");
-      this.$emit("finish");
+      window.typeMessage("Torna al Menu", true, true);
     },
   },
 });
