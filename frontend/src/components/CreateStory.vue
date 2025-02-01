@@ -30,14 +30,12 @@
             ></textarea>
           </div>
           <div class="mb-3">
-            <label for="storyImage" class="form-label">URL Immagine</label>
-            <input
-              type="text"
-              id="storyImage"
-              class="form-control"
-              v-model="story.image"
-              placeholder="Inserisci il link a un'immagine"
-            />
+            <label for="storyImage" class="form-label">Carica Immagine</label>
+            <input 
+              type="file" 
+              id="storyImage" 
+              class="form-control" 
+              @change="handleImageUpload" />
           </div>
           <div class="mb-3">
             <label for="storyGenre" class="form-label">Genere</label>
@@ -89,10 +87,17 @@ export default defineComponent({
       } as Story,
       storySaved: false,
       storyId: "", // Memorizza l'ID della storia
+      selectedImage: null as File | null,
       aisuruService: new AisuruService(), // Inizializza il servizio Aisuru
     };
   },
   methods: {
+    handleImageUpload(event: Event) {
+      const target = event.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        this.selectedImage = target.files[0];
+      }
+    },
     async saveStory() {
       try {
         // Id utente corrente TODO guarda se c'è già metodo nel repository

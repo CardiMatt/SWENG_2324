@@ -1,4 +1,4 @@
-import { ref, uploadBytes, getDownloadURL, listAll } from "firebase/storage";
+import { ref, uploadBytes, getDownloadURL, listAll, deleteObject } from "firebase/storage";
 import { storage } from "../firebase";
 
 /**
@@ -19,14 +19,10 @@ class ImageRepository {
       throw new Error("Nessun file fornito per il caricamento");
     }
 
-    // Crea un riferimento al file nel bucket
     const fileRef = ref(storage, `${folder}/${file.name}`);
 
     try {
-      // Carica il file
       await uploadBytes(fileRef, file);
-
-      // Recupera l'URL di download
       const downloadUrl = await getDownloadURL(fileRef);
       return downloadUrl;
     } catch (error) {
@@ -41,14 +37,10 @@ class ImageRepository {
    * @returns Una Promise con una lista di URL delle immagini
    */
   static async fetchImages(folder: string = "images"): Promise<string[]> {
-    // Crea un riferimento alla cartella
     const folderRef = ref(storage, `${folder}/`);
 
     try {
-      // Elenca tutti i file nella cartella
       const result = await listAll(folderRef);
-
-      // Recupera gli URL di download per ogni file
       const urls = await Promise.all(
         result.items.map((item) => getDownloadURL(item))
       );
@@ -56,6 +48,78 @@ class ImageRepository {
       return urls;
     } catch (error) {
       console.error("Errore durante il recupero delle immagini:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Recupera i metadati di un'immagine specifica su Firebase Storage
+   * @param fileName - Il nome del file da recuperare
+   * @param folder - La cartella in cui si trova il file (default: "images")
+   * @returns Una Promise con l'URL dell'immagine
+   */
+  static async getImage(fileName: string, folder: string = "images"): Promise<string> {
+    if (!fileName) {
+      throw new Error("Nome del file non fornito");
+    }
+
+    const fileRef = ref(storage, `${folder}/${fileName}`);
+
+    try {
+      const downloadUrl = await getDownloadURL(fileRef);
+      return downloadUrl;
+    } catch (error) {
+      console.error("Errore durante il recupero dell'immagine:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Elimina un'immagine specifica da Firebase Storage
+   * @param fileName - Il nome del file da eliminare
+   * @param folder - La cartella in cui si trova il file (default: "images")
+   * @returns Una Promise void
+   */
+  static async deleteImage(fileName: string, folder: string = "images"): Promise<void> {
+    if (!fileName) {
+      throw new Error("Nome del file non fornito");
+    }
+
+    const fileRef = ref(storage, `${folder}/${fileName}`);
+
+    try {
+      await deleteObject(fileRef);
+      console.log(`Immagine ${fileName} eliminata con successo`);
+    } catch (error) {
+      console.error("Errore durante l'eliminazione dell'immagine:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Aggiorna un'immagine esistente su Firebase Storage
+   * @param file - Il nuovo file immagine da caricare
+   * @param fileName - Il nome del file esistente da sovrascrivere
+   * @param folder - La cartella in cui si trova il file (default: "images")
+   * @returns Una Promise con l'URL pubblico dell'immagine aggiornata
+   */
+  static async updateImage(
+    file: File,
+    fileName: string,
+    folder: string = "images"
+  ): Promise<string> {
+    if (!file || !fileName) {
+      throw new Error("File o nome del file non forniti per l'aggiornamento");
+    }
+
+    const fileRef = ref(storage, `${folder}/${fileName}`);
+
+    try {
+      await deleteObject(fileRef);
+      console.log(`Immagine ${fileName} eliminata per aggiornamento`);
+      return await this.uploadImage(file, folder);
+    } catch (error) {
+      console.error("Errore durante l'aggiornamento dell'immagine:", error);
       throw error;
     }
   }
