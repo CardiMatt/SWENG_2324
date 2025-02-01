@@ -6,6 +6,7 @@ import Catalog from './components/Catalog.vue';
 import CatalogCard from './components/CatalogCard.vue';
 import SaveGame from './components/SaveGame.vue';
 import CreateStory from './components/CreateStory.vue';
+import BrowseSaves from './components/BrowseSaves.vue';
 
 // Funzione per montare i componenti Vue
 function mountVueComponentsInChat(className, vueComponent) {
@@ -36,7 +37,7 @@ function unmountVueComponentsInChat(className) {
   });
 }
 
-function mountVueComponentsInExtention(vueComponent) {
+function mountVueComponentsInExtention(vueComponent, props = {}) {
   const extension = document.getElementById("extension");
 
   // Resetta il contenuto e applica gli stili principali
@@ -64,7 +65,7 @@ function mountVueComponentsInExtention(vueComponent) {
   extension.appendChild(innerDiv);
 
   // Monta il componente Vue all'interno del div interno
-  createApp(vueComponent).mount(innerDiv);
+  createApp(vueComponent, props).mount(innerDiv);
 }
 
 
@@ -92,7 +93,7 @@ window.mountVueComponents = mountVueComponents;
 window.mountVueComponentsInChat = mountVueComponentsInChat;
 window.mountVueComponentsInExtention = mountVueComponentsInExtention;
 window.unmountVueComponentsInChat = unmountVueComponentsInChat;
-window.unmountVueComponentsInExtention = unmountVueComponentsInExtention;
+window.unmountVueComponentsInExtention = unmountVueComponentsInExtention; BrowseSaves
 window.Login = Login;
 window.Register = Register;
 window.Logout = Logout;
@@ -100,3 +101,4 @@ window.Catalog = Catalog;
 window.CatalogCard = CatalogCard;
 window.SaveGame = SaveGame;
 window.CreateStory = CreateStory;
+window.BrowseSaves = BrowseSaves;

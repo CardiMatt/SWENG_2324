@@ -63,28 +63,30 @@ export class AisuruService {
       console.error("Errore durante la chiusura della sessione:", error);
       throw error;
     }
+}
+
+  
+public async getMemory(memoryID: string): Promise<any> {
+  if (!this.sessionID) {
+    console.warn("Nessuna sessione attiva. Apertura di una nuova sessione...");
+    await this.openSession();
   }
 
-  public async getMemory(memoryID: string): Promise<any> {
-    if (!this.sessionID) {
-      console.warn("Nessuna sessione attiva. Apertura di una nuova sessione...");
-      await this.openSession();
-    }
-  
-    // Assicura che sessionID non sia null dopo openSession
-    if (!this.sessionID) {
-      throw new Error("Impossibile ottenere un sessionID valido.");
-    }
-  
-    try {
-      const memory = await this.client.getMemory(this.sessionID, memoryID);
-      console.log("Memory: ", memory);
-      return memory;
-    } catch (error) {
-      console.error("Errore durante il recupero di Memory:", error);
-      throw error;
-    }
+  // Assicura che sessionID non sia null dopo openSession
+  if (!this.sessionID) {
+    throw new Error("Impossibile ottenere un sessionID valido.");
   }
+
+  try {
+    const memory = await this.client.getMemory(this.sessionID, memoryID);
+    console.log("Memory: ", memory);
+    return memory;
+  } catch (error) {
+    console.error("Errore durante il recupero di Memory:", error);
+    throw error;
+  }
+}
+
 
   /**
    * Ottiene i dettagli della sessione corrente
