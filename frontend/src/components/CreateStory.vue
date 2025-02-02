@@ -3,7 +3,7 @@
   - salvataggio immagine, come?
   -->
   <div class="container mt-5">
-    <h1>Crea una nuova storia</h1>
+    <h1>{{ existingStory ? "Modifica la storia" : "Crea una nuova storia" }}</h1>
 
     <!-- Dettagli della storia -->
     <div v-if="!storySaved">
@@ -48,14 +48,14 @@
             />
           </div>
           <button type="submit" class="btn btn-primary">
-            Salva Dettagli della Storia
+            {{ existingStory ? "Salva Modifiche" : "Salva Dettagli della Storia" }}
           </button>
+          
         </form>
-      <!--</div>-->
     </div>
      <!-- Componente CreateScenario -->
      <CreateScenario
-        v-else
+        v-if="storySaved && !existingStory"
         :storyTitle="story.title"
         :storyId="storyId"
         @finish="resetStory"
@@ -65,20 +65,30 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, type PropType } from "vue";
 import type { Story } from "../models/Story";
 import { StoryRepository } from "../repositories/StoryRepository";
 import { getAuth } from "firebase/auth";
 import { AisuruService } from "@/services/AisuruService";
 import CreateScenario from "./CreateScenario.vue";
+import ImageRepository from "@/repositories/ImageRepository";
 
 export default defineComponent({
   name: "CreateStory",
+  props: {
+    existingStory: {
+      type: Object as PropType<Story | null>,
+      default: null,
+    },
+  },
   components: { CreateScenario },
   emits: ["storySaved"],
+  /*
   data() {
     return {
-      story: {
+      story:  this.existingStory
+      ? { ...this.existingStory }
+      : {
         title: "",
         description: "",
         image: "",
@@ -86,12 +96,46 @@ export default defineComponent({
         genre: "",
       } as Story,
       storySaved: false,
-      storyId: "", // Memorizza l'ID della storia
+      //storyId: "",  Memorizza l'ID della storia
+      storyId: this.existingStory?.id || "",
       selectedImage: null as File | null,
       aisuruService: new AisuruService(), // Inizializza il servizio Aisuru
     };
+  },*/
+  data() {
+    return {
+      story: {} as Story,
+      storySaved: false,
+      storyId: "",
+      selectedImage: null as File | null,
+      aisuruService: new AisuruService(),
+    };
   },
-  methods: {
+  created() {
+    this.initializeStory();
+  },
+  watch: {
+    existingStory: {
+      handler() {
+        this.initializeStory();
+      },
+      deep: true,
+      immediate: true, // Inizializza subito se existingStory è già disponibile
+    },
+  },
+methods: {
+  initializeStory() {
+      this.story = this.existingStory
+        ? { ...this.existingStory }
+        : {
+            id: "",
+            title: "",
+            description: "",
+            image: "",
+            author: "",
+            genre: "",
+          };
+    },
     handleImageUpload(event: Event) {
       const target = event.target as HTMLInputElement;
       if (target.files && target.files[0]) {
@@ -110,21 +154,31 @@ export default defineComponent({
         // autore utente corrente
         this.story.author = currentUser.uid;
 
-        // Controllo stato sessione
-        try {
+          // Controllo stato sessione
+          try {
           this.aisuruService.checkEnsureSession();
         } catch (error) {
           console.error("Errore nel verificare/creare una sessione da giver:", error);
         }
 
+        //necessario?
+        if (this.selectedImage) {
+          this.story.image = await ImageRepository.uploadImage(this.selectedImage);
+        } else if (this.existingStory) {
+          this.story.image = this.existingStory.image; // Mantiene l'immagine attuale se non modificata
+        }
 
+        if (this.storyId) {
+          // Se esiste già un ID, significa che stiamo aggiornando una storia
+          await StoryRepository.updateStory(this.storyId, this.story);
+          alert("Storia aggiornata con successo!");
+        } else {
         // Salvataggio storia
-        const storyId = await StoryRepository.saveStory(this.story);
-        console.log("Storia salvata con ID:", storyId);
-        alert(`Storia salvata con successo! ID: ${storyId}`);
-
-        this.storySaved = true;
-        this.storyId = storyId; 
+        const newStoryId = await StoryRepository.saveStory(this.story);
+          this.story.id = newStoryId;
+          alert(`Storia salvata con successo! ID: ${newStoryId}`);
+          this.storySaved = true;
+        }
 
       } catch (error) {
         console.error("Errore durante il salvataggio della storia:", error);
@@ -134,6 +188,7 @@ export default defineComponent({
     // Reset stato componente
     resetStory() {
       this.storySaved = false;
+      //this.initializeStory();  che dovrebbe sostituire quello sotto
       this.storyId = "";
       this.story = {
         id: "",

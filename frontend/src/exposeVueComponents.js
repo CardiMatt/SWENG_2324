@@ -7,6 +7,9 @@ import CatalogCard from './components/CatalogCard.vue';
 import SaveGame from './components/SaveGame.vue';
 import CreateStory from './components/CreateStory.vue';
 import BrowseSaves from './components/BrowseSaves.vue';
+import BrowseCreatedStory from './components/BrowseCreatedStory.vue';
+import BrowseCreatedStoryCard from './components/BrowseCreatedStoryCard.vue';
+import BrowseCreatedStoryScenarios from './components/BrowseCreatedStoryScenarios.vue';
 
 // Funzione per montare i componenti Vue
 function mountVueComponentsInChat(className, vueComponent) {
@@ -102,3 +105,6 @@ window.CatalogCard = CatalogCard;
 window.SaveGame = SaveGame;
 window.CreateStory = CreateStory;
 window.BrowseSaves = BrowseSaves;
+window.BrowseCreatedStory = BrowseCreatedStory;
+window.BrowseCreatedStoryCard = BrowseCreatedStoryCard;
+window.BrowseCreatedStoryScenarios = BrowseCreatedStoryScenarios;

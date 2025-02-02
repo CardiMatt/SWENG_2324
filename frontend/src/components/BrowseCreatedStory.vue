@@ -1,5 +1,6 @@
 <!--Componente di browse delle storie create con possibilità di modifica e 
-accesso a componente di creazione storia -->
+accesso a componente di creazione storia 
+TODO sarebbe stories non story-->
 
 <template>
     <div class="main-container">
@@ -22,11 +23,10 @@ accesso a componente di creazione storia -->
       <div class="catalog-container">
         <div class="catalog-grid">
             <!--TODO-->
-          <CatalogCard 
+          <BrowseCreatedStoryCard
             v-for="story in filteredStories" 
             :key="story.id" 
             :story="story" 
-            @open-popup="openPopup"
           />
         </div>
       </div>
@@ -35,13 +35,14 @@ accesso a componente di creazione storia -->
   
   <script>
   import { defineComponent, ref, computed } from 'vue';
-  import CatalogCard from './CatalogCard.vue';
   import { StoryRepository } from '../repositories/StoryRepository';
+  import BrowseCreatedStoryCard from './BrowseCreatedStoryCard.vue';
+  import { getAuth } from "firebase/auth";
   
   export default defineComponent({
     name: 'BrowseCreatedStory',
     components: {
-      CatalogCard,
+      BrowseCreatedStoryCard,
     },
     setup() {
       const stories = ref([]);
@@ -50,10 +51,12 @@ accesso a componente di creazione storia -->
         genre: '',
         title: '',
       });
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
   
       // Fetch stories from repository
-      //TODO
-      StoryRepository.getAllStories().then((data) => {
+      //TODO gestione utente corrente, si può unificare da qualche parte?
+      StoryRepository.getStoriesByAuthor(currentUser.uid).then((data) => {
         stories.value = data;
       });
   

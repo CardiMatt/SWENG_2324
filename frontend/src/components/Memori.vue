@@ -41,6 +41,7 @@
       ownerUserName="guedz_"
       memoriID="d826f951-3c06-41a7-93ca-568c6c9290b4"
       ownerUserID="775e2e09-1937-428b-bf95-95ed2010ab3b"
+      tenantID="www.aisuru.com"
       engineURL="https://engine.memori.ai"
       apiURL="https://backend.memori.ai"
       baseURL="https://www.aisuru.com"
