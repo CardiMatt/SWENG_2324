@@ -1,8 +1,10 @@
 <template>
   <!--TODO
-  - salvataggio immagine, come?
+  - salvataggio immagine
   -->
+  <button class="btn btn-secondary" @click="$emit('close')">← Torna Indietro</button>
   <div class="container mt-5">
+    
     <h1>{{ existingStory ? "Modifica la storia" : "Crea una nuova storia" }}</h1>
 
     <!-- Dettagli della storia -->
@@ -82,26 +84,26 @@ export default defineComponent({
     },
   },
   components: { CreateScenario },
-  emits: ["storySaved"],
-  /*
-  data() {
-    return {
-      story:  this.existingStory
-      ? { ...this.existingStory }
-      : {
-        title: "",
-        description: "",
-        image: "",
-        author: "",
-        genre: "",
-      } as Story,
-      storySaved: false,
-      //storyId: "",  Memorizza l'ID della storia
-      storyId: this.existingStory?.id || "",
-      selectedImage: null as File | null,
-      aisuruService: new AisuruService(), // Inizializza il servizio Aisuru
-    };
-  },*/
+  emits: ["storySaved", "close"],
+  // /*
+  // data() {
+  //   return {
+  //     story:  this.existingStory
+  //     ? { ...this.existingStory }
+  //     : {
+  //       title: "",
+  //       description: "",
+  //       image: "",
+  //       author: "",
+  //       genre: "",
+  //     } as Story,
+  //     storySaved: false,
+  //     //storyId: "",  Memorizza l'ID della storia
+  //     storyId: this.existingStory?.id || "",
+  //     selectedImage: null as File | null,
+  //     aisuruService: new AisuruService(), // Inizializza il servizio Aisuru
+  //   };
+  // },*/
   data() {
     return {
       story: {} as Story,

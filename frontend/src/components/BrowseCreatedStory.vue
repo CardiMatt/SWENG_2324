@@ -4,32 +4,47 @@ TODO sarebbe stories non story-->
 
 <template>
     <div class="main-container">
-      <div class="filters-container mb-4">
-        <div class="filters-row">
-          <div class="filter-item">
-            <label for="filter-genre" class="form-label">Genere</label>
-            <select v-model="filters.genre" id="filter-genre" class="form-select">
-              <option value="">Tutti</option>
-              <option v-for="genre in uniqueGenres" :key="genre" :value="genre">{{ genre }}</option>
-            </select>
-          </div>
-          <div class="filter-item">
-            <label for="filter-title" class="form-label">Titolo</label>
-            <input v-model="filters.title" type="text" id="filter-title" class="form-control" placeholder="Inserisci titolo">
+      <!-- Mostro il catalogo solo se non stiamo modificando -->
+      <div v-if="currentView === 'catalog'">
+        <div class="filters-container mb-4">
+          <div class="filters-row">
+            <div class="filter-item">
+              <label for="filter-genre" class="form-label">Genere</label>
+              <select v-model="filters.genre" id="filter-genre" class="form-select">
+                <option value="">Tutti</option>
+                <option v-for="genre in uniqueGenres" :key="genre" :value="genre">{{ genre }}</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label for="filter-title" class="form-label">Titolo</label>
+              <input v-model="filters.title" type="text" id="filter-title" class="form-control" placeholder="Inserisci titolo">
+            </div>
           </div>
         </div>
-      </div>
   
-      <div class="catalog-container">
-        <div class="catalog-grid">
-            <!--TODO-->
-          <BrowseCreatedStoryCard
-            v-for="story in filteredStories" 
-            :key="story.id" 
-            :story="story" 
-          />
+        <div class="catalog-container">
+          <div class="catalog-grid">
+              <!--<BrowseCreatedStoryCard
+              v-for="story in filteredStories" 
+              :key="story.id" 
+              :story="story" 
+            />-->
+            <BrowseCreatedStoryCard
+              v-for="story in filteredStories" 
+              :key="story.id" 
+              :story="story"
+              @edit-details="editStory"
+              @edit-content="editContent"
+            />
+          </div>
         </div>
       </div>
+
+      <!-- Mostra il componente di modifica solo se `currentView` è impostato su di esso -->
+      <CreateStory v-if="currentView === 'editStory'" :existingStory="selectedStory" @close="currentView = 'catalog'" />
+      <!--<BrowseCreatedStoryScenarios v-if="currentView === 'editContent'" :storyTitle="selectedStory?.title" @close="currentView = 'catalog'" />-->
+      <BrowseCreatedStoryScenarios v-if="currentView === 'editContent'" :storyTitle="'CuoreDiLuce'" @close="currentView = 'catalog'" />
+      <!--TODO ricordati di cambiare-->
     </div>
   </template>
   
@@ -37,20 +52,26 @@ TODO sarebbe stories non story-->
   import { defineComponent, ref, computed } from 'vue';
   import { StoryRepository } from '../repositories/StoryRepository';
   import BrowseCreatedStoryCard from './BrowseCreatedStoryCard.vue';
+  import CreateStory from './CreateStory.vue';
+  import BrowseCreatedStoryScenarios from './BrowseCreatedStoryScenarios.vue';
   import { getAuth } from "firebase/auth";
   
   export default defineComponent({
     name: 'BrowseCreatedStory',
     components: {
       BrowseCreatedStoryCard,
+      CreateStory, 
+      BrowseCreatedStoryScenarios
     },
     setup() {
       const stories = ref([]);
-      const selectedStory = ref(null);
       const filters = ref({
         genre: '',
         title: '',
       });
+      const selectedStory = ref(null);
+      const currentView = ref('catalog'); // Stato della visualizzazione
+
       const auth = getAuth();
       const currentUser = auth.currentUser;
   
@@ -72,13 +93,27 @@ TODO sarebbe stories non story-->
           return matchesGenre && matchesTitle;
         });
       });
+
+      //  Funzioni per cambiare vista
+      const editStory = (story) => {
+        selectedStory.value = story;
+        currentView.value = 'editStory';
+      };
+
+      const editContent = (story) => {
+        selectedStory.value = story;
+        currentView.value = 'editContent';
+      };
   
       return {
         stories,
-        selectedStory,
         filters,
         filteredStories,
         uniqueGenres,
+        currentView,
+        selectedStory,
+        editStory,
+        editContent
       };
     },
   });

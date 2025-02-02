@@ -6,27 +6,39 @@
         <p class="card-text">{{ story.description }}</p>
         <p class="text-muted">Autore: {{ story.author }}</p>
         <p class="text-muted">Genere: {{ story.genre }}</p>
-        <button class="btn btn-primary" @click="isEditing = true">Modifica dettagli storia</button>
+        <!--<button class="btn btn-primary" @click="isEditing = true">Modifica dettagli storia</button>
         <button class="btn btn-primary" @click="showStoryScenarios">Modifica contenuti</button>
+        -->
+        <button class="btn btn-primary" @click="$emit('edit-details', story)">Modifica dettagli storia</button>
+        <button class="btn btn-primary" @click="$emit('edit-content', story)">Modifica contenuti</button>
       </div>
     </div>
 
-    <CreateStory v-if="isEditing" :existingStory="story" @close="isEditing = false" />
+    <!--   <CreateStory v-if="isEditing" :existingStory="story" @close="isEditing = false" />  -->
+   
 
-      <!-- Mostra gli scenari della storia -->
+      <!-- Mostra gli scenari della storia 
   <BrowseCreatedStoryScenarios 
     v-if="isViewingScenarios" 
     :storyTitle="'CuoreDiLuce'" 
     @close="isViewingScenarios = false" 
-  />
+  /> -->
 </template>
   
 <script>
     import { defineComponent, ref } from 'vue';
-    import CreateStory from './CreateStory.vue';
-    import BrowseCreatedStoryScenarios from './BrowseCreatedStoryScenarios.vue';
+    //import CreateStory from './CreateStory.vue';
+    //import BrowseCreatedStoryScenarios from './BrowseCreatedStoryScenarios.vue';
 
     export default defineComponent({
+      name: 'BrowseCreatedStoryCard',
+  props: {
+    story: {
+      type: Object,
+      required: true,
+    },
+  },
+    /** 
     name: 'BrowseCreatedStoryCard',
     components: { CreateStory,  BrowseCreatedStoryScenarios},
     props: {
@@ -45,21 +57,7 @@
 
         return { isEditing, isViewingScenarios, showStoryScenarios  };
     },
-    methods: {
-        // modifyStory() {
-        //     //<CreateStory :existingStory="storyDaModificare" />
-
-        //     // if (typeof window.typeMessage === 'function') {
-        //     // window.typeMessage(this.story.id, true, true);
-        //     // window.unmountVueComponentsInExtention("BrowseCreatedStory");
-        //     // } else {
-        //     // console.error('window.typeMessage non è definita');
-        //     // }
-        // },
-        modifyMemory(){
-            //window.typeMessage("");
-        }
-    },
+    */
     });
 </script>
 
