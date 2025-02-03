@@ -38,6 +38,7 @@ TODO sarebbe stories non story-->
             />
           </div>
         </div>
+        <button type="button" class="btn btn-info" @click="createStory()">Crea Storia</button>
       </div>
 
       <!-- Mostra il componente di modifica solo se `currentView` è impostato su di esso -->
@@ -104,6 +105,11 @@ TODO sarebbe stories non story-->
         selectedStory.value = story;
         currentView.value = 'editContent';
       };
+
+      const createStory = () => {
+        console.log("createStory");
+        window.mountVueComponentsInExtention(CreateStory);
+      }
   
       return {
         stories,
@@ -113,9 +119,10 @@ TODO sarebbe stories non story-->
         currentView,
         selectedStory,
         editStory,
-        editContent
+        editContent,
+        createStory
       };
-    },
+    }
   });
   </script>
   
