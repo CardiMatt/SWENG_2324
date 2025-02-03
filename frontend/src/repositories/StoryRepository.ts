@@ -9,6 +9,7 @@ import {
   deleteDoc,
   query,
   where,
+  Firestore
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import type { Story } from '../models/Story';
@@ -16,11 +17,23 @@ import type { Story } from '../models/Story';
 const storyCollection = collection(db, 'stories');
 
 export class StoryRepository {
+
+//mio fv-08
+/**   // Create or update a story and returns id
+  static async saveStory(story: Story): Promise<string> {
+    const storyRef = doc(storyCollection);
+    await setDoc(storyRef, story);
+    return storyRef.id
+  } */
+
+
+//nel main
+/**
   /**
    * Crea o aggiorna una storia.
-   * @param story Oggetto Story da salvare (senza id) o aggiornare (con id).
+    @param story Oggetto Story da salvare (senza id) o aggiornare (con id).
    * @returns L'id del documento salvato o aggiornato.
-   */
+   *
   static async saveStory(story: Omit<Story, 'id'> | Story): Promise<string> {
     try {
       if ('id' in story && story.id) {
@@ -38,14 +51,19 @@ export class StoryRepository {
       throw new Error('Non è stato possibile salvare la storia.');
     }
   }
+ * 
+ */    
 
-  /**
-   * Recupera una storia tramite ID.
-   * @param storyId ID della storia.
-   * @returns Oggetto Story se trovato, altrimenti null.
-   */
-  static async getStoryById(storyId: string): Promise<Story | null> {
-    const storyRef = doc(storyCollection, storyId);
+  // Create or update a story
+  static async saveStory(story: Story): Promise<string> {
+    const storyRef = doc(storyCollection);
+    await setDoc(storyRef, story);
+    return storyRef.id
+  }
+
+  // Retrieve a story by ID
+  static async getStoryById(storyId: number): Promise<Story | null> {
+    const storyRef = doc(storyCollection, storyId.toString());
     const docSnapshot = await getDoc(storyRef);
     if (docSnapshot.exists()) {
       return {
