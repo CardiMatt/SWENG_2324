@@ -1,3 +1,4 @@
+// frontend\src\eventBus.ts
 import mitt from 'mitt';
 import type { MemoriConfig } from '@/models/GameSave';
 

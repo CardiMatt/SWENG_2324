@@ -1,15 +1,17 @@
 <!-- frontend\src\components\BrowseSaves.vue -->
 <template>
-  <div class="browse-saves">
-    <h2>Salvataggi</h2>
-    <ul>
-      <li v-for="save in saves" :key="save.id">
+  <div class="browse-saves container mt-4">
+    <h2 class="mb-3">Salvataggi</h2>
+    <ul class="list-group">
+      <li v-for="save in saves" :key="save.id" class="list-group-item">
         <p><strong>Storia:</strong> {{ save.storyId }}</p>
         <p><strong>Progresso:</strong> {{ save.progress }}</p>
         <p><strong>Data:</strong> {{ new Date(save.saveDate).toLocaleString() }}</p>
         <p><strong>Inventario:</strong> {{ save.inventory }}</p>
         <!-- Bottone per caricare il salvataggio -->
-        <button @click="loadSave(save)">Carica</button>
+        <button @click="loadSave(save)" class="btn btn-primary">Carica</button>
+        <!-- Bottone per eliminare il salvataggio -->
+        <button @click="deleteSave(save.id)" class="btn btn-danger ms-2">Elimina salvataggio</button>
       </li>
     </ul>
   </div>
@@ -28,15 +30,12 @@ export default defineComponent({
     const saves = ref<GameSave[]>([]);
 
     const userId = auth.currentUser?.uid;
-    if(!userId){
-      ;
-    }else{
+    if (userId) {
       // Carica i salvataggi dell'utente
-    onMounted(async () => {
-      saves.value = await GameSaveRepository.getGameSavesByUserId(userId);   
-    });
+      onMounted(async () => {
+        saves.value = await GameSaveRepository.getGameSavesByUserId(userId);
+      });
     }
-    
 
     const loadSave = (save: GameSave) => {
       const memoriConfig = save.memoriConfig;
@@ -47,9 +46,19 @@ export default defineComponent({
       }
     };
 
+    const deleteSave = async (id: string) => {
+      if (id) {
+        await GameSaveRepository.deleteGameSaveById(id);
+        saves.value = saves.value.filter(save => save.id !== id); // Aggiorna la lista
+      } else {
+        console.error('ID del salvataggio non valido');
+      }
+    };
+
     return {
       saves,
       loadSave,
+      deleteSave,
     };
   },
 });
@@ -59,26 +68,11 @@ export default defineComponent({
 .browse-saves {
   margin: 20px;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  background: #f4f4f4;
+.list-group-item {
+  background: #f8f9fa;
   margin-bottom: 10px;
-  padding: 10px;
+  padding: 15px;
   border: 1px solid #ddd;
-}
-button {
-  margin-top: 10px;
-  padding: 5px 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
   border-radius: 5px;
-  cursor: pointer;
-}
-button:hover {
-  background-color: #0056b3;
 }
 </style>

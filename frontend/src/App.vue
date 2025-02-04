@@ -30,7 +30,7 @@
 import { defineComponent, ref } from 'vue';
 import Memori from "./components/Memori.vue";
 import SaveGame from './components/SaveGame.vue';
-import Logout from './components/Logout.vue'; // Import del componente Logout
+import Logout from './components/Logout.vue';
 
 // Import dei tipi
 import type { MemoriConfig, GameSave } from "@/models/GameSave";
