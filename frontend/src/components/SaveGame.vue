@@ -44,24 +44,35 @@ export default defineComponent({
         const { contextVars } = memoriState;
         
         // Crea una nuova variabile per memorizzare il valore come stringa
-        const lastMemoryIDString = typeof lastMatchedMemoryID === "string"
-            ? lastMatchedMemoryID
-            : String(lastMatchedMemoryID);
         const contextVarsString = typeof contextVars === "string"
           ? contextVars
           : JSON.stringify(contextVars);
 
         console.log(contextVarsString);
 
-          // Estrai i parametri necessari da contextVarsString
-        const storyId = contextVarsString.match(/STORIA: ([^;]+)/)?.[1] || 'default-story-id';
-        const progress = contextVarsString.match(/SCENARIO: ([^;]+)/)?.[1] || 'default-progress';
-        const inventoryMatches = contextVarsString.match(/OGGETTON\d: ([^;]+)/g) || [];
-        const inventory = inventoryMatches
-          .map((item) => item.match(/OGGETTON\d: ([^;]+)/)?.[1])
-          .filter(Boolean) // Filtra eventuali valori null o undefined
-          .slice(0, 5) // Limita a 5 oggetti
-          .join(', '); // Unisci in una stringa separata da virgole
+        // Converte la stringa JSON in un oggetto JavaScript
+        const parsedContextVars = JSON.parse(contextVarsString);
+
+        // Crea la stringa formattata 'CHIAVE:VALORE,CHIAVE2:VALORE2,...' escludendo PATHNAME e ROUTE
+        const formattedContextVars = Object.entries(parsedContextVars)
+          .filter(([key]) => key !== 'PATHNAME' && key !== 'ROUTE')
+          .map(([key, value]) => `${key}:${value}`)
+          .join(',');
+
+        console.log(formattedContextVars);
+        
+        // Accedi direttamente alle proprietà
+        const storyId = parsedContextVars.STORIA || 'default-story-id';
+        const progress = parsedContextVars.SCENARIO || 'default-progress';
+        const inventoryItems = [];
+        for (let i = 1; i <= 5; i++) {
+          const item = parsedContextVars[`OGGETTON${i}`];
+          if (item) {
+            inventoryItems.push(item);
+          }
+        }
+        const inventory = inventoryItems.join(', ');
+        console.log(contextVarsString);
 
         // Ottieni il Memory associato
         const matchedMemory: any = await aisuruService.getMemory(
@@ -71,7 +82,7 @@ export default defineComponent({
         );
         
         const memoriConfig: MemoriConfig = {
-          context: progress, // Usa progress per il campo context
+          context: formattedContextVars, // prende tutte le contextVars tranne ROUTE e PATHNAME
           initialQuestion: matchedMemory.memory.title // Accedi al titolo all'interno della proprietà memory
         };
 

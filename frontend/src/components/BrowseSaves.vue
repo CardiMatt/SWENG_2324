@@ -20,16 +20,23 @@ import { defineComponent, onMounted, ref } from 'vue';
 import { GameSaveRepository } from '@/repositories/GameSaveRepository';
 import type { GameSave } from '@/models/GameSave';
 import eventBus from '@/eventBus';
+import { auth } from '../firebase';
 
 export default defineComponent({
   name: 'BrowseSaves',
   setup() {
     const saves = ref<GameSave[]>([]);
 
-    // Carica i salvataggi dell'utente
+    const userId = auth.currentUser?.uid;
+    if(!userId){
+      ;
+    }else{
+      // Carica i salvataggi dell'utente
     onMounted(async () => {
-      saves.value = await GameSaveRepository.getFakeGameSave();
+      saves.value = await GameSaveRepository.getGameSavesByUserId(userId);   
     });
+    }
+    
 
     const loadSave = (save: GameSave) => {
       const memoriConfig = save.memoriConfig;
