@@ -1,6 +1,6 @@
 import memoriApiClient from '@memori.ai/memori-api-client';
 import type { Memory } from '@memori.ai/memori-api-client/dist/types';
-import axios from 'axios';
+
 
 export class AisuruService {
   private client: ReturnType<typeof memoriApiClient>;
