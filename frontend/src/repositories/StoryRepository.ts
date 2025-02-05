@@ -127,9 +127,20 @@ export class StoryRepository {
   static async getStoriesByAuthor(author: string): Promise<Story[]> {
     const authorQuery = query(storyCollection, where('author', '==', author));
     const snapshot = await getDocs(authorQuery);
+
+    /* TODO elimina commento. fatta modifica per avere id. se non mettevo tutti i campi non gli andava bene per l'interfaccia
     return snapshot.docs.map((doc) => ({
       id: doc.id,
       ...(doc.data() as Omit<Story, 'id'>)
+    }));*/
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,  // ID del documento Firestore
+      title: doc.data().title || '',  // Fallback se 'title' non esiste
+      description: doc.data().description || '',  
+      image: doc.data().image || '',  
+      author: doc.data().author || '',  
+      genre: doc.data().genre || '',  
     }));
+    
   }
 }

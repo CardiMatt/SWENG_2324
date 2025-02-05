@@ -1,8 +1,8 @@
 <template>
   <!--TODO
-  - settare input text per modifica più grande, adattabile al testo
   - La modifica non viene visualizzata subito, serve tornare indietro e riaprire
   - Indaga su perchè ogni volta apre una nuova sessione.. è uno spreco
+  --quellla roba del caricamento probabilmente inutile
   -->
     <div class="container mt-4">
       <button class="btn btn-secondary" @click="$emit('close')">← Torna Indietro</button>
@@ -40,11 +40,11 @@
                 <ul class="list-group">
                   <li v-for="(answer, aIndex) in memory.answers" :key="aIndex" class="list-group-item">
                     <div v-if="editingMemoryId === memory.memoryID && editingAnswerIndex === aIndex">
-                      <input
-                        type="text"
+                      <textarea
                         v-model="editedAnswer"
                         class="form-control mb-2"
-                      />
+                        rows="3"
+                      ></textarea>
                       <button class="btn btn-success btn-sm me-2" @click="saveEdit(memory.memoryID)">
                         Salva
                       </button>
@@ -92,7 +92,7 @@
     error.value = null;
 
     try {
-        memories.value = await aisuruService.filteredMemories(props.storyTitle);
+        memories.value = await aisuruService.filteredPaginatedMemories(props.storyTitle);
         console.log(memories);
     } catch (err) {
         error.value = 'Errore nel caricamento delle memorie';
@@ -160,5 +160,9 @@ In questo caso, chiama fetchMemories() non appena il componente viene visualizza
   .accordion-button {
     font-weight: bold;
   }
+
+  textarea {
+  resize: vertical;
+}
   </style>
   
