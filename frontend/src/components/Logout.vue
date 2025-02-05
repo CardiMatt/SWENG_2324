@@ -21,7 +21,7 @@ export default defineComponent({
     const menu = () => {
       try {
         if (userId.value) {
-          window.typeMessage('Menu', true, true);
+          window.typeMessage('Torna al menu', true, true);
         }
       } catch (err) {
         console.error("Niente menu", err);
