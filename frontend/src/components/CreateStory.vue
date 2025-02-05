@@ -15,6 +15,7 @@
               class="form-control"
               v-model="story.title"
               required
+              :readonly="!!existingStory"
             />
           </div>
           <div class="mb-3">
@@ -104,18 +105,6 @@ export default defineComponent({
     },
   },
 methods: {
-  /*initializeStory() {
-      this.story = this.existingStory
-        ? { ...this.existingStory }
-        : {
-            id: "",
-            title: "",
-            description: "",
-            image: "",
-            author: "",
-            genre: "",
-          };
-    },*/
     initializeStory() {
       if (this.existingStory) {
         console.log("id esistente: ",this.existingStory.id)
@@ -142,7 +131,6 @@ methods: {
     },
     async saveStory() {
       try {
-        // Id utente corrente TODO guarda se c'è già metodo nel repository
         const auth = getAuth();
         const currentUser = auth.currentUser;
         if (!currentUser) {
@@ -170,8 +158,7 @@ methods: {
           // Se esiste già un ID, significa che stiamo aggiornando una storia
           await StoryRepository.updateStory(this.storyId, this.story);
           alert("Storia aggiornata con successo!");
-          //TODO metti ritorno al catalogo. solo emit close o handleFinish()?
-          this.$emit("close");
+          this.handleFinish();
         } else {
         // Salvataggio storia
         const newStoryId = await StoryRepository.saveStory(this.story);

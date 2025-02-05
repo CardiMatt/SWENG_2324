@@ -1,6 +1,6 @@
 <!--Componente di browse delle storie create con possibilità di modifica e 
 accesso a componente di creazione storia 
-TODO sarebbe stories non story-->
+-->
 
 <template>
     <div class="main-container">
@@ -97,7 +97,6 @@ TODO sarebbe stories non story-->
       const currentUser = auth.currentUser;
   
       // Fetch stories from repository
-      //TODO gestione utente corrente, si può unificare da qualche parte?
       StoryRepository.getStoriesByAuthor(currentUser.uid).then((data) => {
         stories.value = data;
       });

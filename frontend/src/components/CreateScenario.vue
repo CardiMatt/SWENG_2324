@@ -1,7 +1,6 @@
 <template>
   <!--
-  TODO - Da risolvere
-    - contextVarToSet FINALE (etichetta) non trovo come metterlo come etichetta
+
 
     ESEMPIO
     {
@@ -218,12 +217,12 @@ export default defineComponent({
 
       try {
 
-         //Se il titolo è lo storyTitle, imposta STORIA: TITOLSTORIA di default
+         //Se il titolo è lo storyId, imposta STORIA: IDSTORIA di default
          //Dal 2° scenario in poi, STORIA va nelle contextVarsToMatch
-        if (this.scenario.title === this.storyTitle) {
-          contextVarsToSet = { "STORIA": this.storyTitle };
+        if (this.scenario.title === this.storyId) {
+          contextVarsToSet = { "STORIA": this.storyId };
         } else {
-          contextVarsToMatch = { ...contextVarsToMatch, "STORIA": this.storyTitle };
+          contextVarsToMatch = { ...contextVarsToMatch, "STORIA": this.storyId };
         }
 
         // Se lo scenario è finale, aggiunge "FINALE" alle contextVarsToSet
