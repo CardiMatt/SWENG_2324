@@ -61,7 +61,7 @@
       showLogin="false"
       useMathFormatting="false"
       showUpload="false"
-      autoStart="true"
+      autoStart="false"
       enableAudio="true"
       integrationID="5f2ab2ab-5574-4ec6-9034-fd5fb948a449"
       :context="finalMemoriConfig.context"

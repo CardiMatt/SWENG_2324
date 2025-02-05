@@ -48,6 +48,7 @@ accesso a componente di creazione storia
             </div>
           </div>
         </div>
+        <button type="button" class="btn btn-info" @click="createStory()">Crea Storia</button>
       </div>
 
       <!-- Mostra il componente di modifica solo se `currentView` è impostato su su "editStory". 
@@ -151,7 +152,7 @@ accesso a componente di creazione storia
         closeComponent,
         fetchStories
       };
-    },
+    }
   });
   </script>
   
