@@ -1,6 +1,5 @@
-<!-- frontend\src\components\SaveGame.vue -->
 <template>
-  <div class="save-game">
+  <div v-if="storyId !== 'NULL'" class="save-game">
     <button class="btn btn-success" @click="saveProgress" :disabled="isSaving">
       {{ isSaving ? 'Salvataggio...' : 'Salva' }}
     </button>  
@@ -9,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, onMounted, watch } from 'vue';
 import { GameSaveRepository } from '@/repositories/GameSaveRepository';
 import type { GameSave } from '@/models/GameSave';
 import type { MemoriConfig } from '@/models/GameSave';
@@ -21,48 +20,43 @@ export default defineComponent({
   setup() {
     const isSaving = ref(false);
     const errorMessage = ref('');
+    const storyId = ref<string>('NULL');
+
+    const fetchMemoriState = async () => {
+      try {
+        const memoriState: any = await window.getMemoriState();
+        const contextVarsString = JSON.stringify(memoriState.contextVars);
+        const parsedContextVars = JSON.parse(contextVarsString);
+        storyId.value = parsedContextVars.STORIA || 'NULL';
+        console.log(storyId.value);
+      } catch (error) {
+        console.error("Errore nel recupero dello stato Memori:", error);
+      }
+    }; 
 
     const saveProgress = async () => {
+      if (storyId.value === "NULL") return;
+
       isSaving.value = true;
       errorMessage.value = '';
-      // storyId --> contesto storia
-      // scenario --> contesto scenario
-      // initialMessage (ultimo messaggio inviato dall'utente)
 
       try {
-        let aisuruService: AisuruService;
-        aisuruService = new AisuruService();
+        let aisuruService: AisuruService = new AisuruService();
 
-        // Recupera userId da Firebase Auth
         const userId = auth.currentUser?.uid;
         if (!userId) {
           throw new Error('User not authenticated');
         }
-        // Otteniamo l'ID generato
+
         const memoriState: any = await window.getMemoriState();
-        const { lastMatchedMemoryID } = memoriState;
-        const { contextVars } = memoriState;
-        
-        // Crea una nuova variabile per memorizzare il valore come stringa
-        const contextVarsString = typeof contextVars === "string"
-          ? contextVars
-          : JSON.stringify(contextVars);
+        const { lastMatchedMemoryID, contextVars } = memoriState;
+        const parsedContextVars = JSON.parse(JSON.stringify(contextVars));
 
-        console.log(contextVarsString);
-
-        // Converte la stringa JSON in un oggetto JavaScript
-        const parsedContextVars = JSON.parse(contextVarsString);
-
-        // Crea la stringa formattata 'CHIAVE:VALORE,CHIAVE2:VALORE2,...' escludendo PATHNAME e ROUTE
         const formattedContextVars = Object.entries(parsedContextVars)
           .filter(([key]) => key !== 'PATHNAME' && key !== 'ROUTE')
           .map(([key, value]) => `${key}:${value}`)
           .join(',');
 
-        console.log(formattedContextVars);
-        
-        // Accedi direttamente alle proprietà
-        const storyId = parsedContextVars.STORIA || 'default-story-id';
         const progress = parsedContextVars.SCENARIO || 'default-progress';
         const inventoryItems = [];
         for (let i = 1; i <= 5; i++) {
@@ -72,28 +66,25 @@ export default defineComponent({
           }
         }
         const inventory = inventoryItems.join(', ');
-        console.log(contextVarsString);
 
-        // Ottieni il Memory associato
         const matchedMemory: any = await aisuruService.getMemory(
-          typeof lastMatchedMemoryID === 'string'
-          ? lastMatchedMemoryID
-          : String(lastMatchedMemoryID)
+          String(lastMatchedMemoryID)
         );
-        
+
         const memoriConfig: MemoriConfig = {
-          context: formattedContextVars, // prende tutte le contextVars tranne ROUTE e PATHNAME
-          initialQuestion: matchedMemory.memory.title // Accedi al titolo all'interno della proprietà memory
+          context: formattedContextVars,
+          initialQuestion: matchedMemory.memory.title
         };
 
         const docId = await GameSaveRepository.saveGameSave({
-        userId: userId,
-        storyId: storyId,
-        progress: progress,
-        inventory: inventory,
-        saveDate: new Date(),
-        memoriConfig: memoriConfig, 
-      });
+          userId: userId,
+          storyId: storyId.value,
+          progress: progress,
+          inventory: inventory,
+          saveDate: new Date(),
+          memoriConfig: memoriConfig, 
+        });
+
         alert(`Salvataggio completato! ID generato: ${docId}`);
       } catch (err) {
         console.error('Errore nel salvataggio:', err);
@@ -103,10 +94,19 @@ export default defineComponent({
       }
     };
 
+    onMounted(async () => {
+      await fetchMemoriState();
+      document.addEventListener('MemoriNewDialogState', (e: any) => {
+        console.log('Memori state changed:', e.detail);
+        fetchMemoriState();
+      });
+    });
+
     return {
       saveProgress,
       isSaving,
       errorMessage,
+      storyId
     };
   },
 });
@@ -117,4 +117,3 @@ export default defineComponent({
   margin: 20px;
 }
 </style>
-
