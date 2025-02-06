@@ -41,19 +41,27 @@ export class GameSaveRepository {
     try {
       const gameSaveRef = doc(gameSaveCollection, saveId);
       const docSnapshot = await getDoc(gameSaveRef);
-
+  
       if (!docSnapshot.exists()) {
         return null;
       }
-
+  
       const data = docSnapshot.data();
+  
+      // Converte la data correttamente
+      const saveDate = data.saveDate;
+      const dateObj =
+        saveDate && typeof saveDate.toDate === "function"
+          ? saveDate.toDate()
+          : new Date(saveDate);
+  
       return {
         id: saveId,
         userId: data.userId,
         storyId: data.storyId,
         progress: data.progress,
         inventory: data.inventory,
-        saveDate: new Date(data.saveDate),
+        saveDate: dateObj,
         memoriConfig: data.memoriConfig,
       } as GameSave;
     } catch (error) {
@@ -61,6 +69,7 @@ export class GameSaveRepository {
       throw new Error('Non è stato possibile recuperare il salvataggio.');
     }
   }
+  
 
   /**
    * Recupera tutti i salvataggi di un determinato utente.
@@ -71,16 +80,23 @@ export class GameSaveRepository {
     try {
       const userQuery = query(gameSaveCollection, where('userId', '==', userId));
       const querySnapshot = await getDocs(userQuery);
-
+  
       return querySnapshot.docs.map((docSnapshot) => {
         const data = docSnapshot.data();
+        // Converte la data correttamente
+        const saveDate = data.saveDate;
+        const dateObj =
+          saveDate && typeof saveDate.toDate === "function"
+            ? saveDate.toDate()
+            : new Date(saveDate);
+  
         return {
           id: docSnapshot.id,
           userId: data.userId,
           storyId: data.storyId,
           progress: data.progress,
           inventory: data.inventory,
-          saveDate: new Date(data.saveDate),
+          saveDate: dateObj,
           memoriConfig: data.memoriConfig,
         } as GameSave;
       });
@@ -89,6 +105,7 @@ export class GameSaveRepository {
       throw new Error('Non è stato possibile recuperare i salvataggi.');
     }
   }
+  
 
   /**
    * Elimina un salvataggio tramite ID.

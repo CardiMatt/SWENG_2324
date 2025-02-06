@@ -1,6 +1,9 @@
 <!-- frontend/src/components/Logout.vue -->
 <template>
-  <button class="btn btn-danger" @click="logout" v-if="userId">Logout</button>
+  <div class="d-flex justify-content-between w-100 px-3">
+    <button class="btn btn-danger" @click="logout" v-if="userId">Logout</button>
+    <button class="btn btn-primary" @click="menu" v-if="userId">Menu</button>
+  </div>
 </template>
 
 <script lang="ts">
@@ -14,6 +17,16 @@ export default defineComponent({
   name: "Logout",
   setup() {
     const userId = ref<string | null>(null);
+
+    const menu = () => {
+      try {
+        if (userId.value) {
+          window.typeMessage('Torna al menu', true, true);
+        }
+      } catch (err) {
+        console.error("Niente menu", err);
+      }
+    };
 
     const logout = async () => {
       try {
@@ -58,6 +71,7 @@ export default defineComponent({
     return { 
       logout,
       userId,
+      menu,
     };
   },
 });
