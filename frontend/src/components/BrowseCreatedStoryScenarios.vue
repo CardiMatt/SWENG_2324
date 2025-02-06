@@ -1,22 +1,8 @@
 <template>
-  <!--TODO
-  - settare input text per modifica più grande, adattabile al testo
-  - La modifica non viene visualizzata subito, serve tornare indietro e riaprire
-  - Indaga su perchè ogni volta apre una nuova sessione.. è uno spreco
-  -->
     <div class="container mt-4">
       <button class="btn btn-secondary" @click="$emit('close')">← Torna Indietro</button>
       <h2>Memorie della Storia: {{ storyTitle }}</h2>
 
-      <div v-if="loading" class="text-center my-3">
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Caricamento...</span>
-        </div>
-      </div>
-
-      <div v-else-if="error" class="alert alert-danger">{{ error }}</div>
-
-      <div v-else>
         <div class="accordion" id="memoriesAccordion">
           <div class="accordion-item" v-for="(memory, index) in memories" :key="memory.memoryID">
             <h2 class="accordion-header" :id="'heading' + index">
@@ -40,11 +26,11 @@
                 <ul class="list-group">
                   <li v-for="(answer, aIndex) in memory.answers" :key="aIndex" class="list-group-item">
                     <div v-if="editingMemoryId === memory.memoryID && editingAnswerIndex === aIndex">
-                      <input
-                        type="text"
+                      <textarea
                         v-model="editedAnswer"
                         class="form-control mb-2"
-                      />
+                        rows="3"
+                      ></textarea>
                       <button class="btn btn-success btn-sm me-2" @click="saveEdit(memory.memoryID)">
                         Salva
                       </button>
@@ -65,21 +51,15 @@
           </div>
         </div>
       </div>
-    </div>
   </template>
   
-  <!--TODO decidere se usare solo script senza setup come negli altri o questo lasciarlo cosi
-  cambiano 2 robine tipo:
-  rileva automaticamente gli eventi emessi con $emit(), quindi non serve dichiarare manualmente emit
-  -->
 <script setup lang="ts">
+//TODO aggiornamento automatico visualizzazione quando modifico un contesto
   import { ref, onMounted } from 'vue';
   import { AisuruService } from "@/services/AisuruService";
   
   const props = defineProps<{ storyTitle: string }>();
   const memories = ref<{ memoryID: string; title: string; answers: string[] }[]>([]);
-  const loading = ref(true);
-  const error = ref<string | null>(null);
   const aisuruService = new AisuruService();
 
   // Stato per l'editing
@@ -88,17 +68,11 @@
   const editedAnswer = ref<string>("");
 
   const fetchMemories = async () => {
-    loading.value = true;
-    error.value = null;
-
     try {
-        memories.value = await aisuruService.filteredMemories(props.storyTitle);
+        memories.value = await aisuruService.filteredPaginatedMemories(props.storyTitle);
         console.log(memories);
     } catch (err) {
-        error.value = 'Errore nel caricamento delle memorie';
         console.error(err);
-    } finally {
-        loading.value = false;
     }
   };
 
@@ -160,5 +134,9 @@ In questo caso, chiama fetchMemories() non appena il componente viene visualizza
   .accordion-button {
     font-weight: bold;
   }
+
+  textarea {
+  resize: vertical;
+}
   </style>
   

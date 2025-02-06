@@ -4,31 +4,18 @@
       <div class="card-body">
         <h5 class="card-title">{{ story.title }}</h5>
         <p class="card-text">{{ story.description }}</p>
-        <p class="text-muted">Autore: {{ story.author }}</p>
         <p class="text-muted">Genere: {{ story.genre }}</p>
-        <!--<button class="btn btn-primary" @click="isEditing = true">Modifica dettagli storia</button>
-        <button class="btn btn-primary" @click="showStoryScenarios">Modifica contenuti</button>
-        -->
+    
         <button class="btn btn-primary" @click="$emit('edit-details', story)">Modifica dettagli storia</button>
         <button class="btn btn-primary" @click="$emit('edit-content', story)">Modifica contenuti</button>
       </div>
     </div>
 
-    <!--   <CreateStory v-if="isEditing" :existingStory="story" @close="isEditing = false" />  -->
-   
-
-      <!-- Mostra gli scenari della storia 
-  <BrowseCreatedStoryScenarios 
-    v-if="isViewingScenarios" 
-    :storyTitle="'CuoreDiLuce'" 
-    @close="isViewingScenarios = false" 
-  /> -->
 </template>
   
 <script>
     import { defineComponent, ref } from 'vue';
-    //import CreateStory from './CreateStory.vue';
-    //import BrowseCreatedStoryScenarios from './BrowseCreatedStoryScenarios.vue';
+
 
     export default defineComponent({
       name: 'BrowseCreatedStoryCard',
@@ -38,26 +25,7 @@
       required: true,
     },
   },
-    /** 
-    name: 'BrowseCreatedStoryCard',
-    components: { CreateStory,  BrowseCreatedStoryScenarios},
-    props: {
-        story: {
-        type: Object,
-        required: true,
-        },
-    },
-    setup() {
-        const isEditing = ref(false); // 🔹 Controlla la visibilità di CreateStory
-        const isViewingScenarios = ref(false); // Mostra contenuti della storia
-
-        const showStoryScenarios = () => {
-      isViewingScenarios.value = true;
-    };
-
-        return { isEditing, isViewingScenarios, showStoryScenarios  };
-    },
-    */
+   
     });
 </script>
 
