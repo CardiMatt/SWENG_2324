@@ -1,3 +1,4 @@
+<!-- frontend\src\components\Login.vue -->
 <template>
   <div class="card p-4">
     <h5 class="card-title">Login</h5>
@@ -37,6 +38,7 @@ import { defineComponent, ref } from "vue";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import { LogRepository } from "../repositories/LogRepository";
+import eventBus from '@/eventBus';
 
 export default defineComponent({
   name: "Login",
@@ -63,7 +65,6 @@ export default defineComponent({
             { message: "CA001Auth",  hidden: true, waitForPrevious: true },
             { message: 'Menu', hidden: true, waitForPrevious: true},
           ]);
-        
 
       } catch (err: any) {
         error.value = `Errore: ${err.message}`;
