@@ -1,9 +1,6 @@
 <template>
   <!--
-  TODO - Da risolvere
-    - contextVarToSet FINALE (etichetta) non trovo come metterlo come etichetta
-    - immagine oggetto? come?
-    - termina inserimento..typeHiddenMessage con torna al menù?
+
 
     ESEMPIO
     {
@@ -96,8 +93,8 @@ Prova compilata
       <!-- Answers -->
       <div class="mb-3">
         <label for="answer" class="form-label">Risposta</label>
-        <input type="text" id="answer" class="form-control" v-model="scenario.answer.text"
-          placeholder="Inserisci una risposta" required />
+        <textarea type="text" id="answer" class="form-control" v-model="scenario.answer.text"
+          placeholder="Inserisci una risposta" required ></textarea>
       </div>
 
       <!-- Scenario Finale -->
@@ -169,13 +166,17 @@ export default defineComponent({
       type: String,
       required: true,
     },
+    storyId: {
+      type: String,
+      required: true,
+    }
   },
   data() {
     return {
       aisuruService: new AisuruService(),
-      availableHints: ["0001"], // Inizialmente solo "0001"
+      availableHints: [this.storyId], // Inizialmente solo lo storyId (convenzione: primo scenario con titolo come l'id della storia)
       scenario: {
-        title: "0001", // Titolo predefinito per il primo scenario
+        title: this.storyId, // Titolo predefinito per il primo scenario
         answer: {
           text: "",
           preformatted: true,
@@ -216,12 +217,12 @@ export default defineComponent({
 
       try {
 
-         //Se il titolo è "0001", imposta STORIA: TITOLSTORIA di default
+         //Se il titolo è lo storyId, imposta STORIA: IDSTORIA di default
          //Dal 2° scenario in poi, STORIA va nelle contextVarsToMatch
-        if (this.scenario.title === "0001") {
-          contextVarsToSet = { "STORIA": this.storyTitle };
+        if (this.scenario.title === this.storyId) {
+          contextVarsToSet = { "STORIA": this.storyId };
         } else {
-          contextVarsToMatch = { ...contextVarsToMatch, "STORIA": this.storyTitle };
+          contextVarsToMatch = { ...contextVarsToMatch, "STORIA": this.storyId };
         }
 
         // Se lo scenario è finale, aggiunge "FINALE" alle contextVarsToSet
@@ -311,7 +312,7 @@ export default defineComponent({
 
     finishInsertion() {
       alert("Inserimento scenari completato!");
-      window.typeMessage("Torna al Menu", true, true);
+      this.$emit("insertionFinished");
     },
   },
 });
