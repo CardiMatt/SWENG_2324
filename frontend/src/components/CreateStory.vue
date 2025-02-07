@@ -1,3 +1,6 @@
+<!-- Componente di creazione e modifica Storia. 
+  Inserimento e modifica dettagli. 
+  Se si sta creando una nuova storia, passaggio alla creazione di Scenari -->
 <template>
   <div class="container mt-5">
     <button class="btn btn-secondary" @click="$emit('close')">← Torna Indietro</button>
@@ -52,6 +55,7 @@
           
         </form>
     </div>
+
      <!-- Componente CreateScenario -->
      <CreateScenario
         v-if="storySaved && !existingStory"
@@ -92,9 +96,11 @@ export default defineComponent({
       aisuruService: new AisuruService(),
     };
   },
+  /** Popolo i dati della storia se la storia esiste già. */
   created() {
     this.initializeStory();
   },
+  /** watch assicura che il form sia sempre sincronizzato intercettando le modifiche anche dopo il montaggio. */
   watch: {
     existingStory: {
       handler() {
@@ -109,7 +115,7 @@ methods: {
       if (this.existingStory) {
         console.log("id esistente: ",this.existingStory.id)
         this.story = { ...this.existingStory };
-        this.storyId = this.existingStory.id; // ASSICURIAMO DI AVERE L'ID DELLA STORIA
+        this.storyId = this.existingStory.id; // Ci assicuriamo di avere l'id della storia.
       } else {
         this.story = {
           id: "",
@@ -129,6 +135,7 @@ methods: {
         this.selectedImage = target.files[0];
       }
     },
+
     async saveStory() {
       try {
         const auth = getAuth();
@@ -137,30 +144,30 @@ methods: {
           throw new Error("Utente non autenticato");
         }
 
-        // autore utente corrente
+        /** autore = utente corrente **/
         this.story.author = currentUser.uid;
 
-          // Controllo stato sessione
-          try {
+        /** Controllo stato sessione **/
+        try {
           this.aisuruService.checkEnsureSession();
         } catch (error) {
           console.error("Errore nel verificare/creare una sessione da giver:", error);
         }
 
-        //necessario?
+        /** Gestione immagine: se viene caricata la carica, altrimenti mantiene l'immagine attuale **/
         if (this.selectedImage) {
           this.story.image = await ImageRepository.uploadImage(this.selectedImage);
         } else if (this.existingStory) {
-          this.story.image = this.existingStory.image; // Mantiene l'immagine attuale se non modificata
+          this.story.image = this.existingStory.image; 
         }
 
+        /** Se esiste già un ID, significa che stiamo aggiornando una storia.
+         * Altrimenti ne stiamo creando una nuova. **/
         if (this.storyId) {
-          // Se esiste già un ID, significa che stiamo aggiornando una storia
           await StoryRepository.updateStory(this.storyId, this.story);
           alert("Storia aggiornata con successo!");
           this.handleFinish();
         } else {
-        // Salvataggio storia
         const newStoryId = await StoryRepository.saveStory(this.story);
           this.story.id = newStoryId;
           alert(`Storia salvata con successo! ID: ${newStoryId}`);
@@ -172,7 +179,7 @@ methods: {
         alert("Errore durante il salvataggio. Riprova.");
       }
     },
-    // Reset stato componente
+    /** Reset stato componente **/
     handleFinish() {
       this.storySaved = false;
       this.storyId = "";

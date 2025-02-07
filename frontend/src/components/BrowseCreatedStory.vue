@@ -1,12 +1,11 @@
-<!--Componente di browse delle storie create con possibilità di modifica e 
-accesso a componente di creazione storia 
--->
+<!-- Componente di browse delle storie create.
+  Visualizzazione singola storia con BrowseCreatedStoryCard. -->
 
 <template>
     <div class="main-container">
       <button class="close-btn" @click="closeComponent">✖</button>
 
-      <!-- Mostro il catalogo solo se non stiamo modificando -->
+      <!-- Mostro il catalogo solo se currentView è 'catalog' (non stiamo modificando) -->
       <div v-if="currentView === 'catalog'">
         <div class="filters-container mb-4">
           <div class="filters-row">
@@ -24,13 +23,9 @@ accesso a componente di creazione storia
           </div>
         </div>
   
+        <!-- Card per ogni storia creata (applicati filtri Genere e Titolo se presenti)-->
         <div class="catalog-container">
           <div class="catalog-grid">
-              <!--<BrowseCreatedStoryCard
-              v-for="story in filteredStories" 
-              :key="story.id" 
-              :story="story" 
-            />-->
             <BrowseCreatedStoryCard
               v-for="story in filteredStories" 
               :key="story.id" 
@@ -50,14 +45,13 @@ accesso a componente di creazione storia
         </div>
       </div>
 
-      <!-- Mostra il componente di modifica solo se `currentView` è impostato su su "editStory". 
+      <!-- Mostra il componente di modifica solo se `currentView` è 'editStory'. 
        Se lo è allora CreateStory viene montato nel DOM.
-       Quando CreateStory emette l'evento @close, la vista torna al catalogo (currentView = 'catalog' -->
+       Quando CreateStory emette l'evento @close, la vista torna al catalogo (currentView = 'catalog') -->
       <CreateStory 
         v-if="currentView === 'editStory'" 
         :existingStory="selectedStory" 
         @updateStories="fetchStories" 
-        
         @close="() => { fetchStories(); currentView = 'catalog'; }"
       />
 
@@ -96,7 +90,7 @@ accesso a componente di creazione storia
       const auth = getAuth();
       const currentUser = auth.currentUser;
   
-      // Fetch stories from repository
+      // Fetch stories tramite repository
       StoryRepository.getStoriesByAuthor(currentUser.uid).then((data) => {
         stories.value = data;
       });
@@ -114,7 +108,7 @@ accesso a componente di creazione storia
         });
       });
 
-      //  Funzioni per cambiare vista
+      /**Funzioni per cambiare vista e fetch per refresh**/
       const editStory = (story) => {
         selectedStory.value = story;
         currentView.value = 'editStory';
@@ -179,21 +173,7 @@ accesso a componente di creazione storia
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     position: relative;
   }
-  
-  .popup-container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1050;
-    background-color: rgba(0, 0, 0, 0.5);
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
+    
   /* Contenitore principale */
   .main-container {
     background-color: #f8f9fa;
@@ -240,31 +220,6 @@ accesso a componente di creazione storia
     gap: 15px; /* Spaziatura tra le card */
   }
   
-  /* Popup */
-  .popup-container {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1050;
-    background-color: rgba(0, 0, 0, 0.5);
-    width: 90%;
-    max-width: 600px;
-    height: auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    border-radius: 8px;
-  }
-  
-  .popup-container .popup-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  }
-  
   /* Card */
   .catalog-container .card {
     display: flex;
@@ -307,4 +262,4 @@ accesso a componente di creazione storia
 }
 
   
-  </style>
+</style>

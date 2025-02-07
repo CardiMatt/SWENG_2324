@@ -90,14 +90,12 @@
     editedAnswer.value = "";
   };
 
-
-
   // Salva la modifica e chiama UpdateScenario
   const saveEdit = async (memoryID: string) => {
 
     if (!editingMemoryId.value) {
-    console.error("Errore: memoryID è null");
-    return;
+      console.error("Errore: memoryID è null");
+      return;
     }
 
     const memory = {
@@ -115,28 +113,26 @@
 
     try{
       await aisuruService.updateMemory(memory);
-    console.log("Memoria aggiornata");
-    cancelEdit();
+      console.log("Memoria aggiornata");
+      cancelEdit();
     } catch (error) {
       console.error("Errore durante l'aggiornamento della memoria:", error);
     }
   };
 
-
+  /**onMounted è un hook di Vue 3 che esegue una funzione quando il componente è montato nel DOM.
+  In questo caso, chiama fetchMemories() non appena il componente viene visualizzato */
   onMounted(fetchMemories);
-/**onMounted è un hook di Vue 3 che esegue una funzione quando il componente è montato nel DOM.
-In questo caso, chiama fetchMemories() non appena il componente viene visualizzat */
 
-
-  </script>
+</script>
   
-  <style>
+<style>
   .accordion-button {
     font-weight: bold;
   }
 
   textarea {
   resize: vertical;
-}
-  </style>
+  }
+</style>
   

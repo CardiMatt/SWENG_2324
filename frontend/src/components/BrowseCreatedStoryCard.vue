@@ -1,3 +1,6 @@
+<!-- Componente card singola storia creata, con possibilità di modifica dettagli storia (accesso
+  al componente di creazione storia) e modifica testuale scenari. -->
+
 <template>
     <div class="card h-100">
       <img :src="story.image" class="card-img-top" :alt="story.title" />
@@ -10,23 +13,19 @@
         <button class="btn btn-primary" @click="$emit('edit-content', story)">Modifica contenuti</button>
       </div>
     </div>
-
 </template>
   
 <script>
-    import { defineComponent, ref } from 'vue';
-
-
-    export default defineComponent({
-      name: 'BrowseCreatedStoryCard',
-  props: {
-    story: {
-      type: Object,
-      required: true,
+  import { defineComponent } from 'vue';
+  export default defineComponent({
+    name: 'BrowseCreatedStoryCard',
+    props: {
+      story: {
+        type: Object,
+        required: true,
+      },
     },
-  },
-   
-    });
+  });
 </script>
 
 <style scoped>

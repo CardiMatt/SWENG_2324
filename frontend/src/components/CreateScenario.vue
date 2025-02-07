@@ -1,79 +1,5 @@
+<!-- Componente di creazione scenari (contesti Aisuru (memory))-->
 <template>
-  <!--
-
-
-    ESEMPIO
-    {
-  "memoryID": "string",
-  "memoryType": "string",
-  "title": "string",
-  "answers": [
-    {
-      "text": "string",
-      "preformatted": true,
-      "creationTimestamp": "2025-01-29T10:48:34.753Z",
-      "creationSessionID": "string",
-      "lastChangeTimestamp": "2025-01-29T10:48:34.753Z",
-      "lastChangeSessionID": "string"
-    }
-  ],
-  "date": "2025-01-29T10:48:34.753Z",
-  "placeName": "string",
-  "conclusive": true,
-  "notPickable": true,
-  "help": false,
-  "hints": [
-    "string"
-  ],
-  "contextVarsToSet": {
-    "additionalProp1": "string",
-    "additionalProp2": "string",
-    "additionalProp3": "string"
-  },
-  "contextVarsToMatch": {
-    "additionalProp1": "string",
-    "additionalProp2": "string",
-    "additionalProp3": "string"
-  },
-  "tags": [
-    "string"
-  ]
-}
-
-
-Prova compilata
-{
-  "memoryID": "5788e361-9bfa-4a03-a094-1d10c52a449d",
-  "memoryType": "Question",
-  "title": "Titolo",
-  "answers": [
-    {
-      "text": "risppstaa",
-      "preformatted": true,
-    }
-  ],
-  "date": "2025-01-29T10:48:34.753Z",
-  "conclusive": true,
-  "notPickable": true,
-  "help": false,
-  "hints": [
-    "primoHint"
-  ],
-  "contextVarsToSet": {
-    "additionalProp1": "prpvaprop1toset",
-    "additionalProp2": "provaprop2toset",
-    "additionalProp3": "provaprop3toset"
-  },
-  "contextVarsToMatch": {
-    "additionalProp1": "prova1tomatch",
-    "additionalProp2": "prova2tomach",
-    "additionalProp3": "prova3tomatch"
-  },
-  "tags": [
-    "titoloStoriaTag"
-  ]
-}
--->
   <div class="container mt-5">
     <h2>Crea uno Scenario</h2>
     <form @submit.prevent="saveScenario">
@@ -123,7 +49,6 @@ Prova compilata
         </ul>
       </div>
 
-
       <!-- Context Vars to Set -->
       <div class="mb-3">
         <label for="contextVarsToSet" class="form-label">
@@ -143,7 +68,7 @@ Prova compilata
           placeholder='{"additionalProp1": "prop1ToMatch","additionalProp2": "prop2ToMatch"}'></textarea>
       </div>
 
-      <!-- Pulsanti -->
+      <!-- Bottoni -->
       <div class="d-flex justify-content-between">
         <button type="submit" class="btn btn-primary">
           Salva Scenario e Continua
@@ -174,8 +99,8 @@ export default defineComponent({
   data() {
     return {
       aisuruService: new AisuruService(),
-      availableHints: [this.storyId], // Inizialmente solo lo storyId (convenzione: primo scenario con titolo come l'id della storia)
-      scenario: {
+      availableHints: [this.storyTitle], // Inizialmente solo lo storyTitle (convenzione: primo scenario con titolo come il titolo della storia)
+      /*scenario: {
         title: this.storyId, // Titolo predefinito per il primo scenario
         answer: {
           text: "",
@@ -189,11 +114,13 @@ export default defineComponent({
         contextVarsToSet: "",
         contextVarsToMatch: "",
         isFinal: false,
-      },
+      },*/
+      scenario: createScenario(this.storyId),
       newHint: "", // Input temporaneo per un nuovo hint
     };
   },
   methods: {
+    
     addHint() {
       if (this.newHint.trim() && !this.scenario.hints.includes(this.newHint)) {
         this.scenario.hints.push(this.newHint.trim());
@@ -216,81 +143,86 @@ export default defineComponent({
       let contextVarsToMatch: { [key: string]: string } = { "AUTH": "AUTENTICATO" }; //Sempre presente AUTH
 
       try {
-
-         //Se il titolo è lo storyId, imposta STORIA: IDSTORIA di default
-         //Dal 2° scenario in poi, STORIA va nelle contextVarsToMatch
-        if (this.scenario.title === this.storyId) {
+         /** Se il titolo è lo storyTitle, imposta STORIA: IDSTORIA di default
+         Dal 2° scenario in poi, STORIA va nelle contextVarsToMatch **/
+        if (this.scenario.title === this.storyTitle) {
           contextVarsToSet = { "STORIA": this.storyId };
         } else {
           contextVarsToMatch = { ...contextVarsToMatch, "STORIA": this.storyId };
         }
 
-        // Se lo scenario è finale, aggiunge "FINALE" alle contextVarsToSet
+        /** Se lo scenario è finale, aggiunge "FINALE" alle contextVarsToSet **/
         if (this.scenario.isFinal) {
           contextVarsToSet["FINALE"] = "true"; // "true" è simbolico, può essere vuoto ""
         }
 
-        /**TODO qui si potrebbe mettere un pattern per evitare tutti questi if else? boh */
-
-         // Popola contextVarsToSet
-        if (this.scenario.contextVarsToSet.trim()) {
+        /** Popola contextVarsToSet **/
+        /*if (this.scenario.contextVarsToSet.trim()) {
           const parsed = JSON.parse(this.scenario.contextVarsToSet);
           if (typeof parsed !== 'object' || Array.isArray(parsed)) {
             throw new Error("contextVarsToSet deve essere un oggetto JSON.");
           }
           contextVarsToSet = { ...contextVarsToSet, ...parsed }; //Merge con eventuali altri valori
     
-        }
+        }*/
 
-         // Popola contextVarsToMatch
-        if (this.scenario.contextVarsToMatch.trim()) {
+        /** Popola contextVarsToMatch **/
+        /*if (this.scenario.contextVarsToMatch.trim()) {
           const parsed = JSON.parse(this.scenario.contextVarsToMatch);
           if (typeof parsed !== 'object' || Array.isArray(parsed)) {
             throw new Error("contextVarsToMatch deve essere un oggetto JSON.");
           }
-          contextVarsToMatch = {  ...contextVarsToMatch, ...parsed  }; // Merge completo
+          contextVarsToMatch = {  ...contextVarsToMatch, ...parsed  }; // Merge valori
+        }*/
+
+        try {
+          contextVarsToSet = { ...contextVarsToSet, ...parseContextVars(this.scenario.contextVarsToSet) };
+          contextVarsToMatch = { ...contextVarsToMatch, ...parseContextVars(this.scenario.contextVarsToMatch) };
+        
+          if (contextVarsToSet !== null) {
+            this.scenario.contextVarsToSet = JSON.stringify(contextVarsToSet, null, 2);
+          }
+
+          if (contextVarsToMatch !== null) {
+            this.scenario.contextVarsToMatch = JSON.stringify(contextVarsToMatch, null, 2);
+          }
+        } catch (error) {
+          alert('Errore nel settaggio delle Context Vars');
+          return;
         }
 
-        if (contextVarsToSet !== null) {
-          this.scenario.contextVarsToSet = JSON.stringify(contextVarsToSet, null, 2);
-        }
+        const memory = {
+          memoryType: 'Question' as 'Question',
+          title: this.scenario.title,
+          answers: [
+            {
+              text: this.scenario.answer.text,
+              preformatted: this.scenario.answer.preformatted,
+            },
+          ],
+          date: new Date().toISOString(),
+          conclusive: this.scenario.conclusive,
+          notPickable: this.scenario.notPickable,
+          help: this.scenario.help,
+          hints: this.scenario.hints,
+          ...(contextVarsToSet !== null && { contextVarsToSet }),
+          contextVarsToMatch, //Assicurato: sempre presente con AUTH: AUTENTICATO
+          tags: [this.storyTitle],
+        };
 
-        if (contextVarsToMatch !== null) {
-          this.scenario.contextVarsToMatch = JSON.stringify(contextVarsToMatch, null, 2);
-        }
+        const memoryID = await this.aisuruService.addMemory(memory);
+        console.log("Memoria salvata con ID:", memoryID);
+
       } catch (error) {
-        alert(`Errore nel campo Context Vars to Set`);
-        return;
+          alert(`Errore nel salvataggio della Memoria`);
+          return;
       }
- 
-      const memory = {
-        memoryType: 'Question' as 'Question',
-        title: this.scenario.title,
-        answers: [
-          {
-            text: this.scenario.answer.text,
-            preformatted: this.scenario.answer.preformatted,
-          },
-        ],
-        date: new Date().toISOString(),
-        conclusive: this.scenario.conclusive,
-        notPickable: this.scenario.notPickable,
-        help: this.scenario.help,
-        hints: this.scenario.hints,
-        ...(contextVarsToSet !== null && { contextVarsToSet }),
-        contextVarsToMatch, //Assicurato sempre presente con AUTH: AUTENTICATO
-        tags: [this.storyTitle],
-      };
-
-
-      const memoryID = await this.aisuruService.addMemory(memory);
-      console.log("Memoria salvata con ID:", memoryID);
 
       this.prepareNextScenario();
     },
 
     prepareNextScenario() {
-      const currentTitle = this.scenario.title;
+      /*const currentTitle = this.scenario.title;
       this.availableHints = this.availableHints.filter((hint) => hint !== currentTitle);
 
       this.scenario = {
@@ -307,7 +239,9 @@ export default defineComponent({
         contextVarsToSet: "",
         contextVarsToMatch: "",
         isFinal: false,
-      };
+      };*/
+      this.availableHints = this.availableHints.filter(hint => hint !== this.scenario.title);
+      this.scenario = createScenario(this.availableHints[0] || "");
     },
 
     finishInsertion() {
@@ -316,6 +250,41 @@ export default defineComponent({
     },
   },
 });
+
+/** Factory function che centralizza la creazione di nuovi scenari**/
+function createScenario(title: string = "") {
+  return {
+    title,
+    answer: {
+      text: "",
+      preformatted: true,
+    },
+    memoryType: "Question",
+    conclusive: true,
+    notPickable: true,
+    help: false,
+    hints: [] as string[],
+    contextVarsToSet: "",
+    contextVarsToMatch: "",
+    isFinal: false,
+  };
+}
+
+/** Function che centralizza il parsing e la validazione dei JSON**/
+function parseContextVars(input: string): Record<string, string> {
+  if (!input.trim()) return {}; // Se vuoto, restituisce un oggetto vuoto
+  try {
+    const parsed = JSON.parse(input);
+    if (typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error("Il JSON deve essere un oggetto.");
+    }
+    return parsed;
+  } catch {
+    throw new Error("Formato JSON non valido.");
+  }
+}
+
+
 </script>
 
 <style scoped>

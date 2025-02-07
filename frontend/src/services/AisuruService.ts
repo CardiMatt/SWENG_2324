@@ -119,8 +119,6 @@ public async getMemory(memoryID: string): Promise<any> {
   }
  
 
-
-
   /**   Memories   */
   /**
      * Lista tutte le memorie
@@ -200,50 +198,6 @@ public async getMemory(memoryID: string): Promise<any> {
       throw error;
     }
   }
-
-  /*
-  async filteredMemories(storyTitle: string) {
-    await this.ensureSession();
-    //NON posso usarlo perchè è statico
-    try {
-      console.log("Session ID:", this.sessionID, ", titolo storia:", storyTitle);
-        const response = await fetch(`https://engine.memori.ai/memori/v2/FilterMemories/${this.sessionID}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                memoryTags: [storyTitle],
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Errore HTTP! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("Response Data:", data);
-
-        if (!response.ok) {
-          console.error(`HTTP Error ${response.status}:`, data);
-          throw new Error(data?.resultMessage || `HTTP Error ${response.status}`);
-        }
-
-        if (data && data.matches) {
-            return data.matches.map((match: any) => ({
-                memoryID: match.memory.memoryID,
-                title: match.memory.title,
-                answers: match.memory.answers.map((answer: any) => answer.text),
-            }));
-        }
-
-        return [];
-    } catch (error) {
-        console.error('Errore nel recupero delle memorie:', error);
-        throw error;
-    }
-  }
-  */
 
   async filteredPaginatedMemories(storyTitle: string) {
     await this.ensureSession();
