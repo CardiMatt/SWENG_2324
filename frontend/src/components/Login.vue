@@ -62,7 +62,7 @@ export default defineComponent({
 
         //window.typeMessage("Contenuto di Attivazione", true, true);
         window.typeBatchMessages([
-            { message: "CA001Auth",  hidden: true, waitForPrevious: true },
+            { message: "CA001Auth",  hidden: true, waitForPrevious: true, typingText: "Autenticazione in corso..."},
             { message: 'Menu', hidden: true, waitForPrevious: true},
           ]);
 

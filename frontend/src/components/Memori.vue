@@ -3,10 +3,10 @@
   <div>
     <memori-client
       :key="refreshKey"
-      memoriName="Adventures Master"
-      ownerUserName="matteocardinale2002"
-      memoriID="fa22537f-6cd4-45f9-b21e-347747222db6"
-      ownerUserID="fcfa7ae4-aedc-4a52-a137-4d2a858d6561"
+      memoriName="AdventuresMaster"
+      ownerUserName="guedz_"
+      memoriID="d826f951-3c06-41a7-93ca-568c6c9290b4"
+      ownerUserID="775e2e09-1937-428b-bf95-95ed2010ab3b"
       tenantID="www.aisuru.com"
       engineURL="https://engine.memori.ai"
       apiURL="https://backend.memori.ai"
@@ -29,7 +29,7 @@
       showUpload="false"
       autoStart="false"
       enableAudio="true"
-      integrationID="5f2ab2ab-5574-4ec6-9034-fd5fb948a449"
+      integrationID="b949a370-6383-4a8e-9a13-621980e38503"
       :context="finalMemoriConfig.context"
       :initialQuestion="finalMemoriConfig.initialQuestion"
     />
@@ -97,3 +97,16 @@ defineExpose({
   refreshMemori,
 });
 </script>
+
+
+<style>
+    .memori--global-background {
+    pointer-events: none; /* Disabilita l'interazione con il background */
+    }
+
+    #chat-fieldset {
+    display: none;  /*Nasconde completamente l'elemento */
+    pointer-events: none;  /*Disabilita l'interazione con il puntatore */
+    user-select: none; /*Impedisce la selezione del contenuto */
+    }   
+</style>
