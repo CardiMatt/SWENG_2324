@@ -1,9 +1,11 @@
 <!--Componente di browse delle storie create con possibilità di modifica e 
 accesso a componente di creazione storia 
-TODO sarebbe stories non story-->
+-->
 
 <template>
     <div class="main-container">
+      <button class="close-btn" @click="closeComponent">✖</button>
+
       <!-- Mostro il catalogo solo se non stiamo modificando -->
       <div v-if="currentView === 'catalog'">
         <div class="filters-container mb-4">
@@ -36,16 +38,35 @@ TODO sarebbe stories non story-->
               @edit-details="editStory"
               @edit-content="editContent"
             />
+
+            <!-- Card vuota per creare una nuova storia -->
+            <div class="card create-story-card" @click="createNewStory">
+              <div class="card-body text-center">
+                <h5 class="card-title">Crea una nuova storia</h5>
+                <button class="btn btn-success">+</button>
+              </div>
+            </div>
           </div>
         </div>
         <button type="button" class="btn btn-info" @click="createStory()">Crea Storia</button>
       </div>
 
-      <!-- Mostra il componente di modifica solo se `currentView` è impostato su di esso -->
-      <CreateStory v-if="currentView === 'editStory'" :existingStory="selectedStory" @close="currentView = 'catalog'" />
-      <!--<BrowseCreatedStoryScenarios v-if="currentView === 'editContent'" :storyTitle="selectedStory?.title" @close="currentView = 'catalog'" />-->
-      <BrowseCreatedStoryScenarios v-if="currentView === 'editContent'" :storyTitle="'CuoreDiLuce'" @close="currentView = 'catalog'" />
-      <!--TODO ricordati di cambiare-->
+      <!-- Mostra il componente di modifica solo se `currentView` è impostato su su "editStory". 
+       Se lo è allora CreateStory viene montato nel DOM.
+       Quando CreateStory emette l'evento @close, la vista torna al catalogo (currentView = 'catalog' -->
+      <CreateStory 
+        v-if="currentView === 'editStory'" 
+        :existingStory="selectedStory" 
+        @updateStories="fetchStories" 
+        
+        @close="() => { fetchStories(); currentView = 'catalog'; }"
+      />
+
+      <BrowseCreatedStoryScenarios 
+        v-if="currentView === 'editContent'" 
+        :storyTitle="selectedStory?.title" 
+        @close="currentView = 'catalog'" 
+      />
     </div>
   </template>
   
@@ -77,7 +98,6 @@ TODO sarebbe stories non story-->
       const currentUser = auth.currentUser;
   
       // Fetch stories from repository
-      //TODO gestione utente corrente, si può unificare da qualche parte?
       StoryRepository.getStoriesByAuthor(currentUser.uid).then((data) => {
         stories.value = data;
       });
@@ -106,10 +126,18 @@ TODO sarebbe stories non story-->
         currentView.value = 'editContent';
       };
 
-      const createStory = () => {
-        console.log("createStory");
-        window.mountVueComponentsInExtention(CreateStory);
-      }
+      const createNewStory = () => {
+        selectedStory.value = null;
+        currentView.value = "editStory";
+      };
+
+      const closeComponent = () => {
+        window.unmountVueComponentsInExtention("BrowseCreatedStory");
+      };
+
+      const fetchStories = async () => {
+        stories.value = await StoryRepository.getStoriesByAuthor(currentUser.uid);
+      };
   
       return {
         stories,
@@ -120,7 +148,9 @@ TODO sarebbe stories non story-->
         selectedStory,
         editStory,
         editContent,
-        createStory
+        createNewStory,
+        closeComponent,
+        fetchStories
       };
     }
   });
@@ -260,5 +290,22 @@ TODO sarebbe stories non story-->
     transform: translateY(-5px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   }
+
+  /**Card vuota */
+  .create-story-card {
+  border: 2px dashed #28a745;
+  background-color: #f8f9fa;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.create-story-card:hover {
+  background-color: #e9ecef;
+}
+
   
   </style>

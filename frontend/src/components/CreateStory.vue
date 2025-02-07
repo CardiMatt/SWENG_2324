@@ -1,10 +1,6 @@
 <template>
-  <!--TODO
-  - salvataggio immagine
-  -->
-  <button class="btn btn-secondary" @click="$emit('close')">← Torna Indietro</button>
   <div class="container mt-5">
-    
+    <button class="btn btn-secondary" @click="$emit('close')">← Torna Indietro</button>
     <h1>{{ existingStory ? "Modifica la storia" : "Crea una nuova storia" }}</h1>
 
     <!-- Dettagli della storia -->
@@ -19,6 +15,7 @@
               class="form-control"
               v-model="story.title"
               required
+              :readonly="!!existingStory"
             />
           </div>
           <div class="mb-3">
@@ -59,8 +56,8 @@
      <CreateScenario
         v-if="storySaved && !existingStory"
         :storyTitle="story.title"
-        :storyId="storyId"
-        @finish="resetStory"
+        :storyId="story.id"
+        @insertionFinished="handleFinish"
     />
   
   </div>
@@ -84,26 +81,8 @@ export default defineComponent({
     },
   },
   components: { CreateScenario },
-  emits: ["storySaved", "close"],
-  // /*
-  // data() {
-  //   return {
-  //     story:  this.existingStory
-  //     ? { ...this.existingStory }
-  //     : {
-  //       title: "",
-  //       description: "",
-  //       image: "",
-  //       author: "",
-  //       genre: "",
-  //     } as Story,
-  //     storySaved: false,
-  //     //storyId: "",  Memorizza l'ID della storia
-  //     storyId: this.existingStory?.id || "",
-  //     selectedImage: null as File | null,
-  //     aisuruService: new AisuruService(), // Inizializza il servizio Aisuru
-  //   };
-  // },*/
+  emits: ["close", "updateStories"],
+
   data() {
     return {
       story: {} as Story,
@@ -126,18 +105,24 @@ export default defineComponent({
     },
   },
 methods: {
-  initializeStory() {
-      this.story = this.existingStory
-        ? { ...this.existingStory }
-        : {
-            id: "",
-            title: "",
-            description: "",
-            image: "",
-            author: "",
-            genre: "",
-          };
+    initializeStory() {
+      if (this.existingStory) {
+        console.log("id esistente: ",this.existingStory.id)
+        this.story = { ...this.existingStory };
+        this.storyId = this.existingStory.id; // ASSICURIAMO DI AVERE L'ID DELLA STORIA
+      } else {
+        this.story = {
+          id: "",
+          title: "",
+          description: "",
+          image: "",
+          author: "",
+          genre: "",
+        };
+        this.storyId = "";
+      }
     },
+
     handleImageUpload(event: Event) {
       const target = event.target as HTMLInputElement;
       if (target.files && target.files[0]) {
@@ -146,7 +131,6 @@ methods: {
     },
     async saveStory() {
       try {
-        // Id utente corrente TODO guarda se c'è già metodo nel repository
         const auth = getAuth();
         const currentUser = auth.currentUser;
         if (!currentUser) {
@@ -174,6 +158,7 @@ methods: {
           // Se esiste già un ID, significa che stiamo aggiornando una storia
           await StoryRepository.updateStory(this.storyId, this.story);
           alert("Storia aggiornata con successo!");
+          this.handleFinish();
         } else {
         // Salvataggio storia
         const newStoryId = await StoryRepository.saveStory(this.story);
@@ -188,9 +173,8 @@ methods: {
       }
     },
     // Reset stato componente
-    resetStory() {
+    handleFinish() {
       this.storySaved = false;
-      //this.initializeStory();  che dovrebbe sostituire quello sotto
       this.storyId = "";
       this.story = {
         id: "",
@@ -200,6 +184,8 @@ methods: {
         author: "",
         genre: "",
       };
+      this.$emit("updateStories"); 
+      this.$emit("close");
     },
   },
 });
