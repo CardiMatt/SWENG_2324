@@ -18,42 +18,6 @@ const storyCollection = collection(db, 'stories');
 
 export class StoryRepository {
 
-//mio fv-08
-/**   // Create or update a story and returns id
-  static async saveStory(story: Story): Promise<string> {
-    const storyRef = doc(storyCollection);
-    await setDoc(storyRef, story);
-    return storyRef.id
-  } */
-
-
-//nel main
-/**
-  /**
-   * Crea o aggiorna una storia.
-    @param story Oggetto Story da salvare (senza id) o aggiornare (con id).
-   * @returns L'id del documento salvato o aggiornato.
-   *
-  static async saveStory(story: Omit<Story, 'id'> | Story): Promise<string> {
-    try {
-      if ('id' in story && story.id) {
-        // Aggiorna una storia esistente
-        const storyRef = doc(storyCollection, story.id);
-        await setDoc(storyRef, story);
-        return story.id;
-      } else {
-        // Crea una nuova storia e genera l'id automaticamente
-        const docRef = await addDoc(storyCollection, story);
-        return docRef.id;
-      }
-    } catch (error) {
-      console.error('Errore durante la creazione o aggiornamento della storia:', error);
-      throw new Error('Non è stato possibile salvare la storia.');
-    }
-  }
- * 
- */    
-
   // Create or update a story
   static async saveStory(story: Story): Promise<string> {
     const storyRef = doc(storyCollection);
@@ -80,10 +44,12 @@ export class StoryRepository {
    */
   static async getAllStories(): Promise<Story[]> {
     const snapshot = await getDocs(storyCollection);
-    return snapshot.docs.map((doc) => ({
+    const stories = snapshot.docs.map((doc) => ({
+      ...(doc.data() as Omit<Story, 'id'>), // Spread degli altri campi della storia
       id: doc.id, // Aggiungi l'id del documento
-      ...(doc.data() as Omit<Story, 'id'>) // Spread degli altri campi della storia
     }));
+    console.log(stories);
+    return stories
   }
 
   /**

@@ -25,10 +25,11 @@
     methods: {
         playStory() {
             if (typeof window.typeMessage === 'function') {
-            window.typeMessage(this.story.id, true, true);
-            window.unmountVueComponentsInExtention("Catalog");
+                console.log(this.story.id);
+                window.typeMessage(this.story.id, true, true);
+                window.unmountVueComponentsInExtention("Catalog");
             } else {
-            console.error('window.typeMessage non è definita');
+                console.error('window.typeMessage non è definita');
             }
         },
     },

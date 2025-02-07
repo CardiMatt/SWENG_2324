@@ -10,14 +10,9 @@
     <v-main>
       <v-container fluid>
         <v-row>
-          <!-- Colonna sinistra -->
           <v-col cols="12" md="6" class="left-column">
-            <!-- Qui puoi aggiungere contenuto o pulsanti di test -->
           </v-col>
-
-          <!-- Colonna destra -->
           <v-col cols="12" md="12" class="memori-container">
-            <!-- ESEMPIO 1: Passare solo memoriConfig -->
             <Memori :memoriConfig="someMemoriConfig" /> 
           </v-col>
         </v-row>

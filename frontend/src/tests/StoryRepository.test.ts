@@ -1,137 +1,101 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { StoryRepository } from '../repositories/StoryRepository';
-import { collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc, query, where } from 'firebase/firestore';
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  query,
+  where,
+} from 'firebase/firestore';
+import { firebaseApp } from '../firebase'; // Assicurati che il path sia corretto
 
-vi.mock('firebase/firestore', () => ({
-  collection: vi.fn(),
-  doc: vi.fn(),
-  setDoc: vi.fn(),
-  getDoc: vi.fn(),
-  getDocs: vi.fn(),
-  updateDoc: vi.fn(),
-  deleteDoc: vi.fn(),
-  query: vi.fn(),
-  where: vi.fn(),
-}));
+const db = getFirestore(firebaseApp);
+const storiesCollection = collection(db, 'stories');
+const testStoryId = 'test-story-123'; // ID univoco per il test
 
-describe('StoryRepository', () => {
-  const mockStory = {
-    id: 'story123',
-    title: 'A Great Story',
-    description: 'This is a test story',
-    image: 'image_url',
-    author: 'John Doe',
-    genre: 'Adventure',
-  };
+const mockStory = {
+  title: 'A Great Story',
+  description: 'This is a test story',
+  image: 'image_url',
+  author: 'John Doe',
+  genre: 'Adventure',
+};
 
-  beforeEach(() => {
-    vi.clearAllMocks(); // Reset mocks prima di ogni test
+describe('StoryRepository (Firestore Prod)', () => {
+  beforeEach(async () => {
+    // Crea una storia di test prima di ogni test
+    await setDoc(doc(storiesCollection, testStoryId), mockStory);
+  });
+
+  afterEach(async () => {
+    // Elimina la storia di test dopo ogni test
+    await deleteDoc(doc(storiesCollection, testStoryId));
   });
 
   it('should save a story', async () => {
-    const setDocMock = vi.fn();
-    (doc as any).mockReturnValue({});
-    (setDoc as any).mockImplementation(setDocMock);
+    // Usa addDoc per ottenere un ID generato automaticamente
+    const newStoryId = await StoryRepository.saveStory(mockStory);
 
-    await StoryRepository.saveStory(mockStory);
+    // Attendi un breve tempo per permettere la propagazione in Firestore
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    expect(doc).toHaveBeenCalledWith(expect.anything(), 'story123');
-    expect(setDocMock).toHaveBeenCalledWith({}, mockStory);
+    const snapshot = await getDoc(doc(storiesCollection, newStoryId));
+    expect(snapshot.exists()).toBe(true);
+    expect(snapshot.data()).toMatchObject(mockStory);
+
+    await deleteDoc(doc(storiesCollection, newStoryId)); // Pulizia
   });
 
   it('should retrieve a story by ID', async () => {
-    const getDocMock = vi.fn().mockResolvedValue({
-      exists: () => true,
-      data: () => mockStory,
-    });
-    (doc as any).mockReturnValue({});
-    (getDoc as any).mockImplementation(getDocMock);
+    const result = await StoryRepository.getStoryById(testStoryId);
 
-    const result = await StoryRepository.getStoryById('story123');
-
-    expect(doc).toHaveBeenCalledWith(expect.anything(), 'story123');
-    expect(getDoc).toHaveBeenCalled();
-    expect(result).toEqual(mockStory);
+    expect(result).not.toBeNull();
+    expect(result).toMatchObject(mockStory);
   });
 
   it('should return null if story not found', async () => {
-    const getDocMock = vi.fn().mockResolvedValue({ exists: () => false });
-    (doc as any).mockReturnValue({});
-    (getDoc as any).mockImplementation(getDocMock);
-
-    const result = await StoryRepository.getStoryById('story123');
-
-    expect(getDoc).toHaveBeenCalled();
+    const result = await StoryRepository.getStoryById('non-existent-story');
     expect(result).toBeNull();
   });
 
   it('should retrieve all stories', async () => {
-    const getDocsMock = vi.fn().mockResolvedValue({
-      docs: [
-        { data: () => mockStory },
-        { data: () => ({ ...mockStory, id: 'story124', title: 'Another Story' }) },
-      ],
-    });
-    (getDocs as any).mockImplementation(getDocsMock);
-
     const result = await StoryRepository.getAllStories();
 
-    expect(getDocs).toHaveBeenCalledWith(expect.anything());
-    expect(result).toEqual([
-      mockStory,
-      { ...mockStory, id: 'story124', title: 'Another Story' },
-    ]);
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
   });
 
   it('should update a story', async () => {
-    const updateDocMock = vi.fn();
-    (doc as any).mockReturnValue({});
-    (updateDoc as any).mockImplementation(updateDocMock);
+    await StoryRepository.updateStory(testStoryId, { title: 'Updated Story Title' });
 
-    await StoryRepository.updateStory('story123', { title: 'Updated Title' });
-
-    expect(doc).toHaveBeenCalledWith(expect.anything(), 'story123');
-    expect(updateDocMock).toHaveBeenCalledWith({}, { title: 'Updated Title' });
+    const snapshot = await getDoc(doc(storiesCollection, testStoryId));
+    expect(snapshot.data()).toMatchObject({ title: 'Updated Story Title' });
   });
 
   it('should delete a story', async () => {
-    const deleteDocMock = vi.fn();
-    (doc as any).mockReturnValue({});
-    (deleteDoc as any).mockImplementation(deleteDocMock);
+    await StoryRepository.deleteStory(testStoryId);
 
-    await StoryRepository.deleteStory('story123');
-
-    expect(doc).toHaveBeenCalledWith(expect.anything(), 'story123');
-    expect(deleteDocMock).toHaveBeenCalledWith({});
+    const snapshot = await getDoc(doc(storiesCollection, testStoryId));
+    expect(snapshot.exists()).toBe(false);
   });
 
   it('should retrieve stories by genre', async () => {
-    const genreQuery = vi.fn();
-    const getDocsMock = vi.fn().mockResolvedValue({
-      docs: [{ data: () => mockStory }],
-    });
-    (query as any).mockReturnValue(genreQuery);
-    (getDocs as any).mockImplementation(getDocsMock);
-
     const result = await StoryRepository.getStoriesByGenre('Adventure');
 
-    expect(query).toHaveBeenCalledWith(expect.anything(), where('genre', '==', 'Adventure'));
-    expect(getDocs).toHaveBeenCalledWith(genreQuery);
-    expect(result).toEqual([mockStory]);
+    expect(Array.isArray(result)).toBe(true);
+    expect(result[0]).toMatchObject(mockStory);
   });
 
   it('should retrieve stories by author', async () => {
-    const authorQuery = vi.fn();
-    const getDocsMock = vi.fn().mockResolvedValue({
-      docs: [{ data: () => mockStory }],
-    });
-    (query as any).mockReturnValue(authorQuery);
-    (getDocs as any).mockImplementation(getDocsMock);
-
     const result = await StoryRepository.getStoriesByAuthor('John Doe');
 
-    expect(query).toHaveBeenCalledWith(expect.anything(), where('author', '==', 'John Doe'));
-    expect(getDocs).toHaveBeenCalledWith(authorQuery);
-    expect(result).toEqual([mockStory]);
+    expect(Array.isArray(result)).toBe(true);
+    expect(result[0]).toMatchObject(mockStory);
   });
 });

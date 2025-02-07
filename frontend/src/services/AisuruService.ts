@@ -1,7 +1,6 @@
 import memoriApiClient from '@memori.ai/memori-api-client';
 import type { Memory } from '@memori.ai/memori-api-client/dist/types';
 
-
 export class AisuruService {
   private client: ReturnType<typeof memoriApiClient>;
   private sessionID: string | null = null;
@@ -9,8 +8,8 @@ export class AisuruService {
   constructor() {
     // Inizializza il client con i parametri predefiniti
     this.client = memoriApiClient(
-      import.meta.env.VITE_BACKEND_URL || "https://backend.memori.ai", // URL backend
-      import.meta.env.VITE_ENGINE_URL || "https://engine.memori.ai"   // URL engine
+      import.meta.env.VITE_BACKEND_URL || 'https://backend.memori.ai', // URL backend
+      import.meta.env.VITE_ENGINE_URL || 'https://engine.memori.ai' // URL engine
     );
   }
 
@@ -27,9 +26,9 @@ export class AisuruService {
 
       if (response.sessionID) {
         this.sessionID = response.sessionID;
-        console.log("Sessione aperta con successo:", this.sessionID);
+        console.log('Sessione aperta con successo:', this.sessionID);
       } else {
-        throw new Error("Impossibile ottenere il sessionID.");
+        throw new Error('Impossibile ottenere il sessionID.');
       }
     } catch (error) {
       console.error("Errore durante l'apertura della sessione:", error);
@@ -42,7 +41,7 @@ export class AisuruService {
    */
   private async ensureSession(): Promise<void> {
     if (!this.sessionID) {
-      console.warn("Nessuna sessione attiva. Apertura di una nuova sessione...");
+      console.warn('Nessuna sessione attiva. Apertura di una nuova sessione...');
       await this.openSession();
     }
   }
@@ -52,88 +51,78 @@ export class AisuruService {
    */
   public async closeSession(): Promise<void> {
     if (!this.sessionID) {
-      console.warn("Nessuna sessione attiva da chiudere.");
+      console.warn('Nessuna sessione attiva da chiudere.');
       return;
     }
 
     try {
       await this.client.deleteSession(this.sessionID);
-      console.log("Sessione chiusa con successo.");
+      console.log('Sessione chiusa con successo.');
       this.sessionID = null;
     } catch (error) {
-      console.error("Errore durante la chiusura della sessione:", error);
+      console.error('Errore durante la chiusura della sessione:', error);
       throw error;
     }
-}
-
-  
-public async getMemory(memoryID: string): Promise<any> {
-  if (!this.sessionID) {
-    console.warn("Nessuna sessione attiva. Apertura di una nuova sessione...");
-    await this.openSession();
   }
 
-  // Assicura che sessionID non sia null dopo openSession
-  if (!this.sessionID) {
-    throw new Error("Impossibile ottenere un sessionID valido.");
-  }
+  public async getMemory(memoryID: string): Promise<any> {
+    if (!this.sessionID) {
+      await this.openSession();
+    }
 
-  try {
-    const memory = await this.client.getMemory(this.sessionID, memoryID);
-    console.log("Memory: ", memory);
-    return memory;
-  } catch (error) {
-    console.error("Errore durante il recupero di Memory:", error);
-    throw error;
-  }
-}
+    // Assicura che sessionID non sia null dopo openSession
+    if (!this.sessionID) {
+      throw new Error('Impossibile ottenere un sessionID valido.');
+    }
 
+    try {
+      return await this.client.getMemory(this.sessionID, memoryID);
+    } catch (error) {
+      console.error('Errore durante il recupero di Memory:', error);
+      throw error;
+    }
+  }
 
   /**
    * Ottiene i dettagli della sessione corrente
    */
   public async getSessionDetails(): Promise<any> {
     if (!this.sessionID) {
-      console.warn("Nessuna sessione attiva. Apertura di una nuova sessione...");
       await this.openSession();
     }
 
-    // Assicura che sessionID non sia null dopo openSession
     if (!this.sessionID) {
-      throw new Error("Impossibile ottenere un sessionID valido.");
+      throw new Error('Impossibile ottenere un sessionID valido.');
     }
 
     try {
-      const sessionDetails = await this.client.getSession(this.sessionID);
-      console.log("Dettagli della sessione ricevuti:", sessionDetails);
-      return sessionDetails;
+      return await this.client.getSession(this.sessionID);
     } catch (error) {
-      console.error("Errore durante il recupero dei dettagli della sessione:", error);
+      console.error('Errore durante il recupero dei dettagli della sessione:', error);
       throw error;
     }
   }
 
   /**public checkEnsureSession */
   public async checkEnsureSession(): Promise<void> {
-    this.ensureSession();
+    // Piccola correzione: Attendiamo effettivamente la sessione
+    await this.ensureSession();
   }
- 
-
-
 
   /**   Memories   */
   /**
-     * Lista tutte le memorie
-     */
-  public async listMemories(type?: 'ALL' | 'CONTENTS' | 'DEFAULTS' | 'DRAFTS' | 'EXPERT_REFERENCES'): Promise<Memory[]> {
+   * Lista tutte le memorie
+   */
+  public async listMemories(
+    type?: 'ALL' | 'CONTENTS' | 'DEFAULTS' | 'DRAFTS' | 'EXPERT_REFERENCES'
+  ): Promise<Memory[]> {
     await this.ensureSession();
 
     try {
       const response = await this.client.getMemories(this.sessionID!, type);
-      console.log("Memorie recuperate:", response.memories);
       return response.memories;
     } catch (error) {
-      console.error("Errore durante il recupero delle memorie:", error);
+      console.error('Errore durante il recupero delle memorie:', error);
       throw error;
     }
   }
@@ -146,10 +135,9 @@ public async getMemory(memoryID: string): Promise<any> {
 
     try {
       const response = await this.client.getMemory(this.sessionID!, memoryID);
-      console.log("Dettagli della memoria:", response.memory);
       return response.memory;
     } catch (error) {
-      console.error("Errore durante il recupero dei dettagli della memoria:", error);
+      console.error('Errore durante il recupero dei dettagli della memoria:', error);
       throw error;
     }
   }
@@ -162,7 +150,6 @@ public async getMemory(memoryID: string): Promise<any> {
 
     try {
       await this.client.patchMemory(this.sessionID!, memory);
-      console.log("Memoria aggiornata con successo:", memory.memoryID);
     } catch (error) {
       console.error("Errore durante l'aggiornamento della memoria:", error);
       throw error;
@@ -177,7 +164,6 @@ public async getMemory(memoryID: string): Promise<any> {
 
     try {
       await this.client.deleteMemory(this.sessionID!, memoryID);
-      console.log("Memoria eliminata con successo:", memoryID);
     } catch (error) {
       console.error("Errore durante l'eliminazione della memoria:", error);
       throw error;
@@ -191,9 +177,7 @@ public async getMemory(memoryID: string): Promise<any> {
     await this.ensureSession();
 
     try {
-      console.log("sessionId: ", this.sessionID, ", titolo ogg memory: ", memory.title, "risp:", memory.answers)
       const response = await this.client.postMemory(this.sessionID!, memory);
-      console.log("Nuova memoria aggiunta con ID:", response.memoryID);
       return response.memoryID;
     } catch (error) {
       console.error("Errore durante l'aggiunta della memoria:", error);
@@ -201,90 +185,45 @@ public async getMemory(memoryID: string): Promise<any> {
     }
   }
 
-  /*
-  async filteredMemories(storyTitle: string) {
-    await this.ensureSession();
-    //NON posso usarlo perchè è statico
-    try {
-      console.log("Session ID:", this.sessionID, ", titolo storia:", storyTitle);
-        const response = await fetch(`https://engine.memori.ai/memori/v2/FilterMemories/${this.sessionID}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                memoryTags: [storyTitle],
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Errore HTTP! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("Response Data:", data);
-
-        if (!response.ok) {
-          console.error(`HTTP Error ${response.status}:`, data);
-          throw new Error(data?.resultMessage || `HTTP Error ${response.status}`);
-        }
-
-        if (data && data.matches) {
-            return data.matches.map((match: any) => ({
-                memoryID: match.memory.memoryID,
-                title: match.memory.title,
-                answers: match.memory.answers.map((answer: any) => answer.text),
-            }));
-        }
-
-        return [];
-    } catch (error) {
-        console.error('Errore nel recupero delle memorie:', error);
-        throw error;
-    }
-  }
-  */
-
   async filteredPaginatedMemories(storyTitle: string) {
     await this.ensureSession();
-    //NON posso usarlo perchè è statico
+
     try {
-      console.log("Session ID:", this.sessionID, ", titolo storia:", storyTitle);
-        const response = await fetch(`https://engine.memori.ai/memori/v2/FilterMemories/${this.sessionID}/0/100`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                memoryTags: [storyTitle],
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Errore HTTP! Status: ${response.status}`);
+      const response = await fetch(
+        `https://engine.memori.ai/memori/v2/FilterMemories/${this.sessionID}/0/100`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            memoryTags: [storyTitle],
+          }),
         }
+      );
 
-        const data = await response.json();
-        console.log("Response Data:", data);
+      if (!response.ok) {
+        throw new Error(`Errore HTTP! Status: ${response.status}`);
+      }
 
-        if (!response.ok) {
-          console.error(`HTTP Error ${response.status}:`, data);
-          throw new Error(data?.resultMessage || `HTTP Error ${response.status}`);
-        }
+      const data = await response.json();
 
-        if (data && data.matches) {
-            return data.matches.map((match: any) => ({
-                memoryID: match.memory.memoryID,
-                title: match.memory.title,
-                answers: match.memory.answers.map((answer: any) => answer.text),
-            }));
-        }
+      if (!response.ok) {
+        throw new Error(data?.resultMessage || `HTTP Error ${response.status}`);
+      }
 
-        return [];
+      if (data && data.matches) {
+        return data.matches.map((match: any) => ({
+          memoryID: match.memory.memoryID,
+          title: match.memory.title,
+          answers: match.memory.answers.map((answer: any) => answer.text),
+        }));
+      }
+
+      return [];
     } catch (error) {
-        console.error('Errore nel recupero delle memorie:', error);
-        throw error;
+      console.error('Errore nel recupero delle memorie:', error);
+      throw error;
     }
   }
-
 }
