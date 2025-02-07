@@ -125,7 +125,7 @@ export default defineComponent({
       }
 
       let contextVarsToSet: { [key: string]: string } = {};
-      let contextVarsToMatch: { [key: string]: string } = { "AUTH": "AUTENTICATO" }; //Sempre presente AUTH
+      let contextVarsToMatch: { [key: string]: string } = {}; 
 
       try {
          /** Se il titolo è lo storyTitle, imposta STORIA: IDSTORIA di default
@@ -133,7 +133,7 @@ export default defineComponent({
         if (this.scenario.title === this.storyTitle) {
           contextVarsToSet = { "STORIA": this.storyId };
         } else {
-          contextVarsToMatch = { ...contextVarsToMatch, "STORIA": this.storyId };
+          contextVarsToMatch = { ...contextVarsToMatch, "STORIA": this.storyId, "AUTH": "AUTENTICATO" };
         }
 
         /** Se lo scenario è finale, aggiunge "FINALE" alle contextVarsToSet **/
@@ -172,7 +172,7 @@ export default defineComponent({
           help: this.scenario.help,
           hints: this.scenario.hints,
           ...(contextVarsToSet !== null && { contextVarsToSet }),
-          contextVarsToMatch, //Assicurato: sempre presente con AUTH: AUTENTICATO
+          ...(contextVarsToMatch !== null && { contextVarsToMatch }),
           tags: [this.storyTitle],
         };
 

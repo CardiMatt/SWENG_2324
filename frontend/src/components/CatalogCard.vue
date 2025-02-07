@@ -24,7 +24,7 @@
     },
     methods: {
         playStory() {
-            console.log("id storia che vuoi giocare: ", this.story.title)
+            console.log("titolo storia che vuoi giocare: ", this.story.title)
             if (typeof window.typeMessage === 'function') {
             window.typeMessage(this.story.title, true, true);
             window.unmountVueComponentsInExtention("Catalog");
