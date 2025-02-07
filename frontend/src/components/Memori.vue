@@ -130,3 +130,14 @@ defineExpose({
   refreshMemori,
 });
 </script>
+
+<style>
+    .memori--global-background {
+    pointer-events: none; /* Disabilita l'interazione con il background */
+    }
+    #chat-fieldset {
+    display: none;  /*Nasconde completamente l'elemento */
+    pointer-events: none;  /*Disabilita l'interazione con il puntatore */
+    user-select: none; /*Impedisce la selezione del contenuto */
+    }   
+</style>
