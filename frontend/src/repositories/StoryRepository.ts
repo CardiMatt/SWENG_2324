@@ -94,13 +94,6 @@ export class StoryRepository {
     const authorQuery = query(storyCollection, where('author', '==', author));
     const snapshot = await getDocs(authorQuery);
 
-    // TODO elimina commento. fatta modifica per avere id. 
-    // se non mettevo tutti i campi non gli andava bene per l'interfaccia
-    //lasciamo per ora entrambe le opzioni, alla più brutta creiamo 2 metodi. la vecchia opzione anche in questo modo non funziona
-   /* return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...(doc.data() as Omit<Story, 'id'>)
-    } as Story));*/
     return snapshot.docs.map((doc) => ({
       id: doc.id,  // ID del documento Firestore
       title: doc.data().title || '',  // Fallback se 'title' non esiste

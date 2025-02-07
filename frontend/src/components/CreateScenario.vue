@@ -100,21 +100,6 @@ export default defineComponent({
     return {
       aisuruService: new AisuruService(),
       availableHints: [this.storyTitle], // Inizialmente solo lo storyTitle (convenzione: primo scenario con titolo come il titolo della storia)
-      /*scenario: {
-        title: this.storyId, // Titolo predefinito per il primo scenario
-        answer: {
-          text: "",
-          preformatted: true,
-        },
-        memoryType: "Question",
-        conclusive: true,
-        notPickable: true,
-        help: false,
-        hints: [] as string[],
-        contextVarsToSet: "",
-        contextVarsToMatch: "",
-        isFinal: false,
-      },*/
       scenario: createScenario(this.storyId),
       newHint: "", // Input temporaneo per un nuovo hint
     };
@@ -155,25 +140,6 @@ export default defineComponent({
         if (this.scenario.isFinal) {
           contextVarsToSet["FINALE"] = "true"; // "true" è simbolico, può essere vuoto ""
         }
-
-        /** Popola contextVarsToSet **/
-        /*if (this.scenario.contextVarsToSet.trim()) {
-          const parsed = JSON.parse(this.scenario.contextVarsToSet);
-          if (typeof parsed !== 'object' || Array.isArray(parsed)) {
-            throw new Error("contextVarsToSet deve essere un oggetto JSON.");
-          }
-          contextVarsToSet = { ...contextVarsToSet, ...parsed }; //Merge con eventuali altri valori
-    
-        }*/
-
-        /** Popola contextVarsToMatch **/
-        /*if (this.scenario.contextVarsToMatch.trim()) {
-          const parsed = JSON.parse(this.scenario.contextVarsToMatch);
-          if (typeof parsed !== 'object' || Array.isArray(parsed)) {
-            throw new Error("contextVarsToMatch deve essere un oggetto JSON.");
-          }
-          contextVarsToMatch = {  ...contextVarsToMatch, ...parsed  }; // Merge valori
-        }*/
 
         try {
           contextVarsToSet = { ...contextVarsToSet, ...parseContextVars(this.scenario.contextVarsToSet) };
@@ -222,24 +188,6 @@ export default defineComponent({
     },
 
     prepareNextScenario() {
-      /*const currentTitle = this.scenario.title;
-      this.availableHints = this.availableHints.filter((hint) => hint !== currentTitle);
-
-      this.scenario = {
-        title: this.availableHints[0] || "", // Il primo hint disponibile diventa il titolo
-        answer: {
-          text: "",
-          preformatted: true,
-        },
-        memoryType: "Question",
-        conclusive: true,
-        notPickable: true,
-        help: false,
-        hints: [],
-        contextVarsToSet: "",
-        contextVarsToMatch: "",
-        isFinal: false,
-      };*/
       this.availableHints = this.availableHints.filter(hint => hint !== this.scenario.title);
       this.scenario = createScenario(this.availableHints[0] || "");
     },
@@ -283,7 +231,6 @@ function parseContextVars(input: string): Record<string, string> {
     throw new Error("Formato JSON non valido.");
   }
 }
-
 
 </script>
 
