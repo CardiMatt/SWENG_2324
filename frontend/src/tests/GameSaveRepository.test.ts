@@ -1,114 +1,116 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { GameSaveRepository } from '../repositories/GameSaveRepository';
-import { collection, doc, setDoc, getDoc, getDocs, query, where, deleteDoc, updateDoc } from 'firebase/firestore';
+import {
+  getFirestore,
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  addDoc,
+  query,
+  where,
+  deleteDoc,
+  updateDoc,
+} from 'firebase/firestore';
+import { firebaseApp } from '../firebase'; // Assicurati che il path sia corretto
 
-vi.mock('firebase/firestore', () => ({
-  collection: vi.fn(),
-  doc: vi.fn(),
-  setDoc: vi.fn(),
-  getDoc: vi.fn(),
-  getDocs: vi.fn(),
-  query: vi.fn(),
-  where: vi.fn(),
-  deleteDoc: vi.fn(),
-  updateDoc: vi.fn(),
-}));
+const db = getFirestore(firebaseApp);
+const gameSavesCollection = collection(db, 'gameSaves');
+const testSaveId = 'test-save-123'; // ID univoco per il test
 
-describe('GameSaveRepository', () => {
-  const mockGameSave = {
-    id: 'save123',
-    userId: 'user-123',
-    storyId: 'story-123',
-    progress: '50%',
-    inventory: 'sword, shield',
-    saveDate: new Date(),
-    memoriConfig: {
-      context: 'AUTH:AUTENTICATO,STORIA:STORY123',
-      initialQuestion: '00001',
-    },
-  };
+const mockGameSave = {
+  userId: 'user-123',
+  storyId: 'story-123',
+  progress: '50%',
+  inventory: 'sword, shield',
+  saveDate: new Date(),
+  memoriConfig: {
+    context: 'AUTH:AUTENTICATO,STORIA:STORY123',
+    initialQuestion: '00001',
+  },
+};
 
-  beforeEach(() => {
-    vi.clearAllMocks(); // Reset dei mock prima di ogni test
+// Funzione di normalizzazione per confrontare le date
+const normalizeGameSave = (data: any) => ({
+  ...data,
+  saveDate: data.saveDate.toDate ? data.saveDate.toDate() : new Date(data.saveDate),
+});
+
+describe('GameSaveRepository (Firestore Prod)', () => {
+  beforeEach(async () => {
+    // Crea un salvataggio di test prima di ogni test
+    await setDoc(doc(gameSavesCollection, testSaveId), mockGameSave);
+  });
+
+  afterEach(async () => {
+    // Elimina il salvataggio di test dopo ogni test
+    await deleteDoc(doc(gameSavesCollection, testSaveId));
   });
 
   it('should save a game save', async () => {
-    const setDocMock = vi.fn();
-    (doc as any).mockReturnValue({});
-    (setDoc as any).mockImplementation(setDocMock);
+    // Usa addDoc per ottenere un ID generato automaticamente
+    const newSaveId = await GameSaveRepository.saveGameSave(mockGameSave);
 
-    const saveId = await GameSaveRepository.saveGameSave(mockGameSave);
+    // Attendi un breve tempo per garantire la propagazione
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    expect(doc).toHaveBeenCalledWith(expect.anything(), 'save123');
-    expect(setDocMock).toHaveBeenCalledWith({}, mockGameSave);
-    expect(saveId).toBe('save123');
+    const snapshot = await getDoc(doc(gameSavesCollection, newSaveId));
+    expect(snapshot.exists()).toBe(true);
+
+    const data = normalizeGameSave(snapshot.data());
+    const expectedData = normalizeGameSave(mockGameSave);
+
+    expect(data).toMatchObject(expectedData);
+
+    await deleteDoc(doc(gameSavesCollection, newSaveId)); // Pulizia
   });
 
   it('should retrieve a game save by ID', async () => {
-    const getDocMock = vi.fn().mockResolvedValue({
-      exists: () => true,
-      data: () => mockGameSave,
-    });
-    (doc as any).mockReturnValue({});
-    (getDoc as any).mockImplementation(getDocMock);
+    const result = await GameSaveRepository.getGameSaveById(testSaveId);
+    expect(result).not.toBeNull();
+    
+    const expectedData = normalizeGameSave(mockGameSave);
+    const resultData = normalizeGameSave(result);
 
-    const result = await GameSaveRepository.getGameSaveById('save123');
-
-    expect(doc).toHaveBeenCalledWith(expect.anything(), 'save123');
-    expect(getDoc).toHaveBeenCalled();
-    expect(result).toEqual(mockGameSave);
+    expect(resultData).toMatchObject(expectedData);
   });
 
   it('should return null if game save not found', async () => {
-    const getDocMock = vi.fn().mockResolvedValue({ exists: () => false });
-    (doc as any).mockReturnValue({});
-    (getDoc as any).mockImplementation(getDocMock);
-
-    const result = await GameSaveRepository.getGameSaveById('save123');
-
-    expect(getDoc).toHaveBeenCalled();
+    const result = await GameSaveRepository.getGameSaveById('non-existent-save');
     expect(result).toBeNull();
   });
 
   it('should retrieve all game saves for a user', async () => {
-    const getDocsMock = vi.fn().mockResolvedValue({
-      docs: [
-        { id: 'save123', data: () => mockGameSave },
-        { id: 'save124', data: () => ({ ...mockGameSave, id: 'save124', progress: '30%' }) },
-      ],
-    });
-    (getDocs as any).mockImplementation(getDocsMock);
-
     const result = await GameSaveRepository.getGameSavesByUserId('user-123');
 
-    expect(query).toHaveBeenCalledWith(expect.anything(), where('userId', '==', 'user-123'));
-    expect(getDocs).toHaveBeenCalled();
-    expect(result).toEqual([
-      { ...mockGameSave, id: 'save123' },
-      { ...mockGameSave, id: 'save124', progress: '30%' },
-    ]);
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
+
+    const resultData = normalizeGameSave(result[0]);
+    const expectedData = normalizeGameSave(mockGameSave);
+
+    // Confronto flessibile delle date (senza millisecondi)
+    expect(resultData).toMatchObject({
+        ...expectedData,
+        saveDate: expect.any(Date), // Verifica che sia un oggetto Date valido
+    });
   });
 
+
   it('should update a game save', async () => {
-    const updateDocMock = vi.fn();
-    (doc as any).mockReturnValue({});
-    (updateDoc as any).mockImplementation(updateDocMock);
+    await GameSaveRepository.updateGameSave(testSaveId, { progress: '60%' });
 
-    await GameSaveRepository.updateGameSave('save123', { progress: '60%' });
-
-    expect(doc).toHaveBeenCalledWith(expect.anything(), 'save123');
-    expect(updateDocMock).toHaveBeenCalledWith({}, { progress: '60%' });
+    const snapshot = await getDoc(doc(gameSavesCollection, testSaveId));
+    expect(snapshot.exists()).toBe(true);
+    expect(snapshot.data()).toMatchObject({ progress: '60%' });
   });
 
   it('should delete a game save by ID', async () => {
-    const deleteDocMock = vi.fn();
-    (doc as any).mockReturnValue({});
-    (deleteDoc as any).mockImplementation(deleteDocMock);
+    await GameSaveRepository.deleteGameSaveById(testSaveId);
 
-    await GameSaveRepository.deleteGameSaveById('save123');
-
-    expect(doc).toHaveBeenCalledWith(expect.anything(), 'save123');
-    expect(deleteDocMock).toHaveBeenCalledWith({});
+    const snapshot = await getDoc(doc(gameSavesCollection, testSaveId));
+    expect(snapshot.exists()).toBe(false);
   });
 
   it('should return fake game saves', async () => {

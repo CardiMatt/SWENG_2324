@@ -29,7 +29,7 @@
             window.typeMessage(this.story.title, true, true);
             window.unmountVueComponentsInExtention("Catalog");
             } else {
-            console.error('window.typeMessage non è definita');
+                console.error('window.typeMessage non è definita');
             }
         },
     },

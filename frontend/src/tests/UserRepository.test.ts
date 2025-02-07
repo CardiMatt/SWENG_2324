@@ -1,115 +1,73 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { UserRepository } from '../repositories/UserRepository';
-import { collection, doc, setDoc, getDoc, deleteDoc, updateDoc, getDocs, query, where } from 'firebase/firestore';
+import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, updateDoc, getDocs, query, where } from 'firebase/firestore';
+import { firebaseApp } from '../firebase';  // Assicurati che il path sia corretto
 
-vi.mock('firebase/firestore', () => ({
-  collection: vi.fn(),
-  doc: vi.fn(),
-  setDoc: vi.fn(),
-  getDoc: vi.fn(),
-  deleteDoc: vi.fn(),
-  updateDoc: vi.fn(),
-  getDocs: vi.fn(),
-  query: vi.fn(),
-  where: vi.fn(),
-}));
+const db = getFirestore(firebaseApp);
+const usersCollection = collection(db, 'users');
+const testUserId = 'test-user-123'; // ID univoco per il test
 
-describe('UserRepository', () => {
-  const mockUser = { id: '123', email: 'john.doe@example.com' };
+describe('UserRepository (Firestore Prod)', () => {
+  beforeEach(async () => {
+    // Resetta il database prima di ogni test (se necessario)
+    await setDoc(doc(usersCollection, testUserId), { email: 'test@example.com' });
+  });
 
-  beforeEach(() => {
-    vi.clearAllMocks(); // Reset mocks prima di ogni test
+  afterEach(async () => {
+    // Pulisce il database dopo ogni test per evitare dati sporchi
+    await deleteDoc(doc(usersCollection, testUserId));
   });
 
   it('should save a user', async () => {
-    const setDocMock = vi.fn();
-    (doc as any).mockReturnValue({});
-    (setDoc as any).mockImplementation(setDocMock);
+    const userRef = doc(usersCollection, 'user-save-test');
+    const userData = { email: 'newuser@example.com' };
 
-    await UserRepository.saveUser(mockUser);
+    await UserRepository.saveUser({ id: 'user-save-test', ...userData });
 
-    expect(doc).toHaveBeenCalledWith(expect.anything(), '123');
-    expect(setDocMock).toHaveBeenCalledWith({}, mockUser);
+    const snapshot = await getDoc(userRef);
+    expect(snapshot.exists()).toBe(true);
+    expect(snapshot.data()).toMatchObject(userData);
+
+    await deleteDoc(userRef); // Pulizia
   });
 
   it('should retrieve a user by ID', async () => {
-    const getDocMock = vi.fn().mockResolvedValue({
-      exists: () => true,
-      data: () => mockUser,
-    });
-    (doc as any).mockReturnValue({});
-    (getDoc as any).mockImplementation(getDocMock);
+    const result = await UserRepository.getUserById(testUserId);
 
-    const result = await UserRepository.getUserById('123');
-
-    expect(doc).toHaveBeenCalledWith(expect.anything(), '123');
-    expect(getDoc).toHaveBeenCalled();
-    expect(result).toEqual(mockUser);
+    expect(result).not.toBeNull();
+    expect(result).toMatchObject({ email: 'test@example.com' });
   });
 
   it('should return null if user not found', async () => {
-    const getDocMock = vi.fn().mockResolvedValue({ exists: () => false });
-    (doc as any).mockReturnValue({});
-    (getDoc as any).mockImplementation(getDocMock);
-
-    const result = await UserRepository.getUserById('123');
-
-    expect(getDoc).toHaveBeenCalled();
+    const result = await UserRepository.getUserById('non-existent-user');
     expect(result).toBeNull();
   });
 
   it('should delete a user', async () => {
-    const deleteDocMock = vi.fn();
-    (doc as any).mockReturnValue({});
-    (deleteDoc as any).mockImplementation(deleteDocMock);
+    await UserRepository.deleteUser(testUserId);
 
-    await UserRepository.deleteUser('123');
-
-    expect(doc).toHaveBeenCalledWith(expect.anything(), '123');
-    expect(deleteDocMock).toHaveBeenCalledWith({});
+    const snapshot = await getDoc(doc(usersCollection, testUserId));
+    expect(snapshot.exists()).toBe(false);
   });
 
   it('should update a user', async () => {
-    const updateDocMock = vi.fn();
-    (doc as any).mockReturnValue({});
-    (updateDoc as any).mockImplementation(updateDocMock);
+    await UserRepository.updateUser(testUserId, { email: 'updated@example.com' });
 
-    await UserRepository.updateUser('123', { email: 'JaneDoe@email.com' });
-
-    expect(doc).toHaveBeenCalledWith(expect.anything(), '123');
-    expect(updateDocMock).toHaveBeenCalledWith({}, { email: 'JaneDoe@email.com' });
+    const snapshot = await getDoc(doc(usersCollection, testUserId));
+    expect(snapshot.data()).toMatchObject({ email: 'updated@example.com' });
   });
 
   it('should retrieve all users', async () => {
-    const getDocsMock = vi.fn().mockResolvedValue({
-      docs: [
-        { data: () => mockUser },
-        { data: () => ({ id: '124', email: 'JaneDoe@email.com' }) },
-      ],
-    });
-    (getDocs as any).mockImplementation(getDocsMock);
-
     const result = await UserRepository.getAllUsers();
 
-    expect(getDocs).toHaveBeenCalledWith(expect.anything());
-    expect(result).toEqual([
-      mockUser,
-      { id: '124', email: 'JaneDoe@email.com' },
-    ]);
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBeGreaterThan(0);
   });
 
   it('should find users by field', async () => {
-    const queryMock = vi.fn();
-    const getDocsMock = vi.fn().mockResolvedValue({
-      docs: [{ data: () => mockUser }],
-    });
-    (query as any).mockReturnValue(queryMock);
-    (getDocs as any).mockImplementation(getDocsMock);
+    const result = await UserRepository.findUsersByField('email', 'test@example.com');
 
-    const result = await UserRepository.findUsersByField('email', 'JaneDoe@email.com');
-
-    expect(query).toHaveBeenCalledWith(expect.anything(), where('email', '==', 'JaneDoe@email.com'));
-    expect(getDocs).toHaveBeenCalledWith(queryMock);
-    expect(result).toEqual([mockUser]);
+    expect(Array.isArray(result)).toBe(true);
+    expect(result[0]).toMatchObject({ email: 'test@example.com' });
   });
 });
