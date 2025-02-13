@@ -1,3 +1,4 @@
+// frontend\src\services\AisuruService.ts
 import memoriApiClient from '@memori.ai/memori-api-client';
 import type { Memory } from '@memori.ai/memori-api-client/dist/types';
 
@@ -65,6 +66,8 @@ export class AisuruService {
     }
   }
 
+
+  // ottieni il contenuto attivato dall'utente 
   public async getMemory(memoryID: string): Promise<any> {
     if (!this.sessionID) {
       await this.openSession();
